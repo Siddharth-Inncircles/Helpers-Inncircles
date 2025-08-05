@@ -1,0 +1,73 @@
+<div class="container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Search helpers</mat-label>
+      <input matInput [(ngModel)]="searchValue">
+    </mat-form-field>
+
+    <div class="filters">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Sort by</mat-label>
+        <mat-select [(ngModel)]="sortValue">
+          <mat-option value="name">Name</mat-option>
+          <mat-option value="employeeCode">ID</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Filter by Service</mat-label>
+        <mat-select [(ngModel)]="serviceValue">
+          <mat-option value="">All</mat-option>
+          <mat-option *ngFor="let t of ['Nurse','Driver','Newspaper','Laundry','Maid','Plumber','Cook']" [value]="t">
+            {{t}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Filter by Organization</mat-label>
+        <input matInput [(ngModel)]="orgValue">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Joined After</mat-label>
+        <input matInput type="date" [(ngModel)]="dateValue">
+      </mat-form-field>
+    </div>
+
+    <mat-nav-list>
+      <mat-list-item *ngFor="let helper of filteredHelpers()" (click)="selectHelper(helper)" [class.selected]="helper === selectedHelper()">
+        <div matLine>{{helper.name}}</div>
+        <div matLine class="sub">{{helper.type}}</div>
+      </mat-list-item>
+    </mat-nav-list>
+  </div>
+
+  <!-- Details -->
+  <div class="details" *ngIf="selectedHelper() as helper">
+    <mat-card>
+      <mat-card-title>{{helper.name}}</mat-card-title>
+      <mat-card-content>
+        <p><b>Employee Code:</b> {{helper.employeeCode}}</p>
+        <p><b>Type:</b> {{helper.type}}</p>
+        <p><b>Organization:</b> {{helper.organization}}</p>
+        <p><b>Gender:</b> {{helper.gender}}</p>
+        <p><b>Languages:</b> {{helper.language.join(', ')}}</p>
+        <p><b>Mobile:</b> {{helper.mobileNo}}</p>
+        <p><b>Email:</b> {{helper.emailId || '-'}}</p>
+        <p><b>Joined On:</b> {{helper.joinedOn | date}}</p>
+        <p><b>Households:</b> {{helper.households}}</p>
+        <p><b>Vehicle:</b> {{helper.vechileType}} - {{helper.vechileNumber || '-'}}</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="editHelper()">Edit</button>
+        <button mat-raised-button color="warn" (click)="deleteHelper()">Delete</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div class="details placeholder" *ngIf="!selectedHelper()">
+    <p>Select a helper to see details</p>
+  </div>
+</div>

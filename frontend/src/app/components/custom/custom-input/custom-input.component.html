@@ -1,0 +1,17 @@
+<!-- <div class="custom-input-group">
+    <mat-icon class="input-icon" *ngIf="icon">{{icon}}</mat-icon>
+    <input [type]="type" [placeholder]="placeholder" 
+    class="custom-input">
+</div> -->
+
+
+
+<mat-form-field appearance="outline" class="custom-form-field">
+  <mat-icon matPrefix *ngIf="icon">{{ icon }}</mat-icon>
+  <mat-label *ngIf="name">{{name}}</mat-label>
+  <input matInput [type]="type" [placeholder]="placeholder" class="custom-input"
+  [value]="value" (input)="onInputChange($event)" />
+</mat-form-field>
+
+
+<!-- [formControl]="control"  -->

@@ -1,0 +1,675 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+
+export interface IHelper {
+  id?: string;
+  employeeCode: string;
+  name: string;
+  type: 'Nurse' | 'Driver' | 'Newspaper' | 'Laundry' | 'Maid' | 'Plumber' | 'Cook';
+  organization: string;
+  gender: 'Male' | 'Female' | 'Other';
+  language: string[];
+  mobileNo: string;
+  emailId?: string;
+  joinedOn: Date;
+  households: number;
+  vechileType: 'Bike' | 'Car' | 'Cycle' | 'Bus' | 'Other';
+  vechileNumber?: string;
+  kycDocument?: File;
+  additionalPdfs?: File[];
+  identificationCard?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatChipsModule,
+    MatCardModule,
+    MatDividerModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    FormsModule
+  ],
+  template: `
+    <div class="helper-management-container">
+      <!-- Header Section -->
+      <div class="header-section">
+        <h1 class="page-title">Helper Management System</h1>
+        
+        <!-- Search and Filter Controls -->
+        <div class="controls-section">
+          <div class="search-controls">
+            <!-- Custom Search Input -->
+            <div class="custom-input-group">
+              <mat-icon class="input-icon">search</mat-icon>
+              <input 
+                type="text" 
+                placeholder="Search helpers..." 
+                class="custom-input search-input"
+                [(ngModel)]="searchTerm"
+                (input)="filterHelpers()"
+              />
+            </div>
+
+            <!-- Sort Options -->
+            <div class="custom-select-group">
+              <mat-icon class="input-icon">sort</mat-icon>
+              <select class="custom-select" [(ngModel)]="sortBy" (change)="sortHelpers()">
+                <option value="name">Sort by Name</option>
+                <option value="employeeCode">Sort by ID</option>
+                <option value="joinedOn">Sort by Join Date</option>
+              </select>
+            </div>
+
+            <!-- Service Filter -->
+            <div class="custom-select-group">
+              <mat-icon class="input-icon">work</mat-icon>
+              <select class="custom-select" [(ngModel)]="filterService" (change)="filterHelpers()">
+                <option value="">All Services</option>
+                <option value="Nurse">Nurse</option>
+                <option value="Driver">Driver</option>
+                <option value="Newspaper">Newspaper</option>
+                <option value="Laundry">Laundry</option>
+                <option value="Maid">Maid</option>
+                <option value="Plumber">Plumber</option>
+                <option value="Cook">Cook</option>
+              </select>
+            </div>
+
+            <!-- Organization Filter -->
+            <div class="custom-input-group">
+              <mat-icon class="input-icon">business</mat-icon>
+              <input 
+                type="text" 
+                placeholder="Filter by organization..." 
+                class="custom-input"
+                [(ngModel)]="filterOrganization"
+                (input)="filterHelpers()"
+              />
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="date-filter-group">
+              <div class="custom-input-group">
+                <mat-icon class="input-icon">date_range</mat-icon>
+                <input 
+                  type="date" 
+                  class="custom-input date-input"
+                  [(ngModel)]="filterDateFrom"
+                  (change)="filterHelpers()"
+                  placeholder="From Date"
+                />
+              </div>
+              <div class="custom-input-group">
+                <input 
+                  type="date" 
+                  class="custom-input date-input"
+                  [(ngModel)]="filterDateTo"
+                  (change)="filterHelpers()"
+                  placeholder="To Date"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Helper Button -->
+          <button class="custom-btn primary-btn add-btn" (click)="openAddHelperForm()">
+            <mat-icon>add</mat-icon>
+            Add Helper
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Left Sidebar - Helpers List -->
+        <div class="helpers-sidebar">
+          <div class="helpers-list-header">
+            <h3>Helpers ({{filteredHelpers.length}})</h3>
+          </div>
+          
+          <div class="helpers-list">
+            <div 
+              *ngFor="let helper of filteredHelpers; trackBy: trackByHelper"
+              class="helper-item"
+              [class.selected]="selectedHelper?.id === helper.id"
+              (click)="selectHelper(helper)"
+            >
+              <div class="helper-avatar">
+                <mat-icon>person</mat-icon>
+              </div>
+              <div class="helper-info">
+                <div class="helper-name">{{helper.name}}</div>
+                <div class="helper-type">{{helper.type}}</div>
+                <div class="helper-org">{{helper.organization}}</div>
+              </div>
+              <div class="helper-status">
+                <span class="status-badge" [class]="'status-' + helper.type.toLowerCase()">
+                  {{helper.type}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel - Helper Details -->
+        <div class="helper-details-panel">
+          <div *ngIf="!selectedHelper && !showAddForm" class="no-selection">
+            <mat-icon class="large-icon">person_search</mat-icon>
+            <h3>Select a helper to view details</h3>
+            <p>Choose a helper from the list to see their complete information</p>
+          </div>
+
+          <!-- Add/Edit Helper Form -->
+          <div *ngIf="showAddForm || isEditing" class="helper-form">
+            <div class="form-header">
+              <h2>{{isEditing ? 'Edit Helper' : 'Add New Helper'}}</h2>
+              <button class="custom-btn secondary-btn" (click)="cancelForm()">
+                <mat-icon>close</mat-icon>
+                Cancel
+              </button>
+            </div>
+
+            <form [formGroup]="helperForm" (ngSubmit)="saveHelper()" class="helper-form-content">
+              <div class="form-row">
+                <div class="custom-input-group">
+                  <label>Employee Code *</label>
+                  <input 
+                    type="text" 
+                    class="custom-input"
+                    formControlName="employeeCode"
+                    placeholder="Enter employee code"
+                  />
+                </div>
+                <div class="custom-input-group">
+                  <label>Full Name *</label>
+                  <input 
+                    type="text" 
+                    class="custom-input"
+                    formControlName="name"
+                    placeholder="Enter full name"
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="custom-select-group">
+                  <label>Service Type *</label>
+                  <select class="custom-select" formControlName="type">
+                    <option value="">Select service type</option>
+                    <option value="Nurse">Nurse</option>
+                    <option value="Driver">Driver</option>
+                    <option value="Newspaper">Newspaper</option>
+                    <option value="Laundry">Laundry</option>
+                    <option value="Maid">Maid</option>
+                    <option value="Plumber">Plumber</option>
+                    <option value="Cook">Cook</option>
+                  </select>
+                </div>
+                <div class="custom-input-group">
+                  <label>Organization *</label>
+                  <input 
+                    type="text" 
+                    class="custom-input"
+                    formControlName="organization"
+                    placeholder="Enter organization name"
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="custom-select-group">
+                  <label>Gender *</label>
+                  <select class="custom-select" formControlName="gender">
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="custom-input-group">
+                  <label>Mobile Number *</label>
+                  <input 
+                    type="tel" 
+                    class="custom-input"
+                    formControlName="mobileNo"
+                    placeholder="Enter mobile number"
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="custom-input-group">
+                  <label>Email ID</label>
+                  <input 
+                    type="email" 
+                    class="custom-input"
+                    formControlName="emailId"
+                    placeholder="Enter email address"
+                  />
+                </div>
+                <div class="custom-input-group">
+                  <label>Joined On *</label>
+                  <input 
+                    type="date" 
+                    class="custom-input"
+                    formControlName="joinedOn"
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="custom-input-group">
+                  <label>Number of Households *</label>
+                  <input 
+                    type="number" 
+                    class="custom-input"
+                    formControlName="households"
+                    placeholder="Enter number of households"
+                    min="0"
+                  />
+                </div>
+                <div class="custom-select-group">
+                  <label>Vehicle Type</label>
+                  <select class="custom-select" formControlName="vechileType">
+                    <option value="">Select vehicle type</option>
+                    <option value="Bike">Bike</option>
+                    <option value="Car">Car</option>
+                    <option value="Cycle">Cycle</option>
+                    <option value="Bus">Bus</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="custom-input-group">
+                  <label>Vehicle Number</label>
+                  <input 
+                    type="text" 
+                    class="custom-input"
+                    formControlName="vechileNumber"
+                    placeholder="Enter vehicle number"
+                  />
+                </div>
+                <div class="custom-input-group">
+                  <label>Languages (comma separated)</label>
+                  <input 
+                    type="text" 
+                    class="custom-input"
+                    formControlName="language"
+                    placeholder="e.g., English, Hindi, Telugu"
+                  />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="custom-btn secondary-btn" (click)="cancelForm()">
+                  Cancel
+                </button>
+                <button type="submit" class="custom-btn primary-btn" [disabled]="!helperForm.valid">
+                  {{isEditing ? 'Update Helper' : 'Add Helper'}}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Helper Details View -->
+          <div *ngIf="selectedHelper && !showAddForm && !isEditing" class="helper-details">
+            <div class="details-header">
+              <div class="helper-profile">
+                <div class="profile-avatar">
+                  <mat-icon>person</mat-icon>
+                </div>
+                <div class="profile-info">
+                  <h2>{{selectedHelper.name}}</h2>
+                  <p class="employee-code">{{selectedHelper.employeeCode}}</p>
+                  <span class="service-badge" [class]="'badge-' + selectedHelper.type.toLowerCase()">
+                    {{selectedHelper.type}}
+                  </span>
+                </div>
+              </div>
+              <div class="action-buttons">
+                <button class="custom-btn secondary-btn" (click)="editHelper()">
+                  <mat-icon>edit</mat-icon>
+                  Edit
+                </button>
+                <button class="custom-btn danger-btn" (click)="deleteHelper()">
+                  <mat-icon>delete</mat-icon>
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <div class="details-content">
+              <div class="detail-section">
+                <h3>Personal Information</h3>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <label>Gender</label>
+                    <span>{{selectedHelper.gender}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Mobile Number</label>
+                    <span>{{selectedHelper.mobileNo}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Email ID</label>
+                    <span>{{selectedHelper.emailId || 'Not provided'}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Languages</label>
+                    <span>{{selectedHelper.language.join(', ')}}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h3>Work Information</h3>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <label>Organization</label>
+                    <span>{{selectedHelper.organization}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Joined On</label>
+                    <span>{{selectedHelper.joinedOn | date:'mediumDate'}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Households Served</label>
+                    <span>{{selectedHelper.households}}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section" *ngIf="selectedHelper.vechileType">
+                <h3>Vehicle Information</h3>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <label>Vehicle Type</label>
+                    <span>{{selectedHelper.vechileType}}</span>
+                  </div>
+                  <div class="detail-item" *ngIf="selectedHelper.vechileNumber">
+                    <label>Vehicle Number</label>
+                    <span>{{selectedHelper.vechileNumber}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styleUrls: ['./app.component.scss']
+})
+export class AppComponent implements OnInit {
+  helpers: IHelper[] = [];
+  filteredHelpers: IHelper[] = [];
+  selectedHelper: IHelper | null = null;
+  
+  // Form and UI state
+  showAddForm = false;
+  isEditing = false;
+  helperForm: FormGroup;
+  
+  // Filter and search properties
+  searchTerm = '';
+  sortBy = 'name';
+  filterService = '';
+  filterOrganization = '';
+  filterDateFrom = '';
+  filterDateTo = '';
+
+  constructor(private fb: FormBuilder) {
+    this.helperForm = this.createForm();
+    this.initializeSampleData();
+  }
+
+  ngOnInit() {
+    this.filteredHelpers = [...this.helpers];
+  }
+
+  createForm(): FormGroup {
+    return this.fb.group({
+      employeeCode: ['', Validators.required],
+      name: ['', Validators.required],
+      type: ['', Validators.required],
+      organization: ['', Validators.required],
+      gender: ['', Validators.required],
+      language: [''],
+      mobileNo: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      emailId: ['', Validators.email],
+      joinedOn: ['', Validators.required],
+      households: [0, [Validators.required, Validators.min(0)]],
+      vechileType: [''],
+      vechileNumber: ['']
+    });
+  }
+
+  initializeSampleData() {
+    this.helpers = [
+      {
+        id: '1',
+        employeeCode: 'EMP001',
+        name: 'Priya Sharma',
+        type: 'Maid',
+        organization: 'CleanCorp Services',
+        gender: 'Female',
+        language: ['Hindi', 'English'],
+        mobileNo: '9876543210',
+        emailId: 'priya.sharma@email.com',
+        joinedOn: new Date('2023-01-15'),
+        households: 5,
+        vechileType: 'Cycle',
+        vechileNumber: '',
+        createdAt: new Date('2023-01-15'),
+        updatedAt: new Date('2023-01-15')
+      },
+      {
+        id: '2',
+        employeeCode: 'EMP002',
+        name: 'Rajesh Kumar',
+        type: 'Driver',
+        organization: 'Safe Drive Co.',
+        gender: 'Male',
+        language: ['Hindi', 'Telugu', 'English'],
+        mobileNo: '9876543211',
+        emailId: 'rajesh.kumar@email.com',
+        joinedOn: new Date('2023-02-20'),
+        households: 8,
+        vechileType: 'Car',
+        vechileNumber: 'TS09ER1234',
+        createdAt: new Date('2023-02-20'),
+        updatedAt: new Date('2023-02-20')
+      },
+      {
+        id: '3',
+        employeeCode: 'EMP003',
+        name: 'Sneha Reddy',
+        type: 'Nurse',
+        organization: 'HealthCare Plus',
+        gender: 'Female',
+        language: ['Telugu', 'English'],
+        mobileNo: '9876543212',
+        emailId: 'sneha.reddy@email.com',
+        joinedOn: new Date('2023-03-10'),
+        households: 3,
+        vechileType: 'Bike',
+        vechileNumber: 'TS09AB5678',
+        createdAt: new Date('2023-03-10'),
+        updatedAt: new Date('2023-03-10')
+      }
+    ];
+  }
+
+  // Helper selection
+  selectHelper(helper: IHelper) {
+    this.selectedHelper = helper;
+    this.showAddForm = false;
+    this.isEditing = false;
+  }
+
+  trackByHelper(index: number, helper: IHelper): string {
+    return helper.id || index.toString();
+  }
+
+  // Form operations
+  openAddHelperForm() {
+    this.showAddForm = true;
+    this.isEditing = false;
+    this.selectedHelper = null;
+    this.helperForm.reset();
+  }
+
+  editHelper() {
+    if (!this.selectedHelper) return;
+    
+    this.isEditing = true;
+    this.showAddForm = false;
+    
+    const languageString = this.selectedHelper.language.join(', ');
+    
+    this.helperForm.patchValue({
+      ...this.selectedHelper,
+      language: languageString,
+      joinedOn: this.formatDateForInput(this.selectedHelper.joinedOn)
+    });
+  }
+
+  cancelForm() {
+    this.showAddForm = false;
+    this.isEditing = false;
+    this.helperForm.reset();
+  }
+
+  saveHelper() {
+    if (!this.helperForm.valid) return;
+
+    const formValue = this.helperForm.value;
+    const languageArray = formValue.language ? 
+      formValue.language.split(',').map((lang: string) => lang.trim()) : [];
+
+    const helperData: IHelper = {
+      ...formValue,
+      language: languageArray,
+      joinedOn: new Date(formValue.joinedOn),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    if (this.isEditing && this.selectedHelper) {
+      // Update existing helper
+      helperData.id = this.selectedHelper.id;
+      helperData.createdAt = this.selectedHelper.createdAt;
+      const index = this.helpers.findIndex(h => h.id === this.selectedHelper!.id);
+      if (index !== -1) {
+        this.helpers[index] = helperData;
+        this.selectedHelper = helperData;
+      }
+    } else {
+      // Add new helper
+      helperData.id = Date.now().toString();
+      this.helpers.push(helperData);
+      this.selectedHelper = helperData;
+    }
+
+    this.filterHelpers();
+    this.cancelForm();
+  }
+
+  deleteHelper() {
+    if (!this.selectedHelper) return;
+    
+    if (confirm(`Are you sure you want to delete ${this.selectedHelper.name}?`)) {
+      this.helpers = this.helpers.filter(h => h.id !== this.selectedHelper!.id);
+      this.selectedHelper = null;
+      this.filterHelpers();
+    }
+  }
+
+  // Filtering and sorting
+  filterHelpers() {
+    let filtered = [...this.helpers];
+
+    // Search filter
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(helper => 
+        helper.name.toLowerCase().includes(term) ||
+        helper.employeeCode.toLowerCase().includes(term) ||
+        helper.organization.toLowerCase().includes(term)
+      );
+    }
+
+    // Service filter
+    if (this.filterService) {
+      filtered = filtered.filter(helper => helper.type === this.filterService);
+    }
+
+    // Organization filter
+    if (this.filterOrganization) {
+      const org = this.filterOrganization.toLowerCase();
+      filtered = filtered.filter(helper => 
+        helper.organization.toLowerCase().includes(org)
+      );
+    }
+
+    // Date range filter
+    if (this.filterDateFrom) {
+      const fromDate = new Date(this.filterDateFrom);
+      filtered = filtered.filter(helper => helper.joinedOn >= fromDate);
+    }
+
+    if (this.filterDateTo) {
+      const toDate = new Date(this.filterDateTo);
+      filtered = filtered.filter(helper => helper.joinedOn <= toDate);
+    }
+
+    this.filteredHelpers = filtered;
+    this.sortHelpers();
+  }
+
+  sortHelpers() {
+    this.filteredHelpers.sort((a, b) => {
+  const aValue = a[this.sortBy as keyof IHelper];
+  const bValue = b[this.sortBy as keyof IHelper];
+
+  // Handle undefined values (treat them as empty strings or lowest)
+  if (aValue === undefined && bValue === undefined) return 0;
+  if (aValue === undefined) return 1;
+  if (bValue === undefined) return -1;
+
+  // Convert values to string for safe comparison
+  return String(aValue).localeCompare(String(bValue));
+});
+
+  }
+
+  private formatDateForInput(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+}

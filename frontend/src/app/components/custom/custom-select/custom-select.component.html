@@ -1,0 +1,23 @@
+<!-- <div class="custom-select-group">
+    <mat-icon class="input-icon" *ngIf="icon">{{icon}}</mat-icon>
+    <select class="custom-select" >
+        <option *ngFor="let opt of options" [value]="opt.value">
+            {{opt.label}}
+        </option>
+    </select>
+</div> -->
+
+
+<mat-form-field appearance="outline" class="custom-form-field">
+  <mat-icon matPrefix *ngIf="icon">{{ icon }}</mat-icon>
+
+  <mat-select [placeholder]="placeholder" class="custom-select" [value]="value" (selectionChange)="onSelectionChange($event.value)">
+    <mat-option *ngFor="let opt of options" [value]="opt.value"
+    >
+      {{ opt.label }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+
+<!-- [formControl]="control" -->

@@ -1,0 +1,19 @@
+.custom-form-field {
+  width: 100%;
+  .mat-form-field-outline {
+    border-radius: 6px;
+  }
+
+  .mat-form-field-wrapper {
+    padding-bottom: 0;
+  }
+
+  .mat-icon {
+    color: #757575;
+    margin-right: 4px;
+  }
+
+  .custom-input {
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,290 @@
+<div class="controls-section">
+    <div class="search-controls">
+        <!-- Custom Search Input -->
+        <app-custom-input [type]="'text'" [placeholder]="'Search helpers...'"
+        [(ngModel)]="searchTerm" (input)="filterHelpers()">
+        </app-custom-input>
+
+        <!-- Sort Options -->
+        <div class="custom-select-group">
+            <app-custom-select [icon]="'sort'" [options]="[{value:'name', label:'Sort by name'},
+                    {value:'id', label:'Sort by ID'},
+                    {value:'date', label:'Sort by Joining Date'},
+                ]" placeholder="Select sort Criteria" [(ngModel)]="sortBy" (ngModelChange)="sortHelpers()">
+            </app-custom-select>
+        </div>
+
+        <!-- Service Filter -->
+        <div class="custom-select-group">
+            <app-custom-select [icon]="'work'" [options]="[
+                    {value:'', label:'All Services'},
+                    {value:'Nurse', label:'Nurse'},
+                    {value:'Driver', label:'Driver'},
+                    {value:'Newspaper', label:'Newspaper'},
+                    {value:'Maid', label:'Maid'},
+                    {value:'Plumber', label:'Plumber'},
+                    {value:'Cook', label:'Cook'},
+                ]" placeholder="Select type of Work" 
+                [(ngModel)]="filterService" (ngModelChange)="filterHelpers()">
+            </app-custom-select>
+        </div>
+
+        <!-- Organization Filter -->
+        <div class="custom-input-group">
+            <app-custom-input [icon]="'business'" [type]="'text'" [placeholder]="'Filter by Organization...'"
+            [(ngModel)]="filterOrganization" (ngModelChange)="filterHelpers()">
+            </app-custom-input>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="date-range-filter">
+            <app-custom-input class="input-date" [icon]="'date_range'" [type]="'date'" [placeholder]="'From Date'"
+            [(ngModel)]="filterDateFrom" (ngModelChange)="filterHelpers()" name="From Date">
+            </app-custom-input>
+            <app-custom-input class="input-date" [icon]="'date_range'" [type]="'date'" [placeholder]="'To Date'"
+            [(ngModel)]="filterDateTo" (ngModelChange)="filterHelpers()" name="To date">
+            </app-custom-input>
+        </div>
+    </div>
+
+
+    <!-- Add Helper Button -->
+    <app-custom-button label="Add Helper" icon="add" ngClass="" (click)="openAddHelperForm()">
+    </app-custom-button>
+</div>
+
+
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Left-SideBar - Helpers List -->
+    <div class="helpers-sidebar">
+        <div class="helpers-list-header">
+            <h3>Helpers ({{filteredHelpers.length}})</h3>
+        </div>
+
+        <div class="helpers-list">
+            <div class="helper-item" *ngFor="let helper of filteredHelpers; trackBy:trackByHelper"
+                [class.selected]="selectedHelper?.id === helper.id" (click)="selectHelper(helper)">
+                <div class="helper-avatar">
+                    <mat-icon>person</mat-icon>
+                </div>
+                <div class="helper-info">
+                    <div class="helper-name"> {{helper.name}} </div>
+                    <!-- <div class="helper-type"> {{helper.type}} </div> -->
+                    <div class="helper-org"> {{helper.organization}} </div>
+                </div>
+                <div class="helper-status">
+                    <span class="status-badge" [class]="'status-' + helper.type.toLowerCase()">
+                        {{helper.type}}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel - Helper Details -->
+    <div class="helper-details-panel">
+        <div *ngIf="!selectHelper && !showAddForm" class="no-selection">
+            <mat-icon class="large-icon">person_search</mat-icon>
+            <h3>Select a helper to view details</h3>
+            <p>Choose a helper from the list to see their complete information</p>
+        </div>
+
+        <!-- Add/Edit Helper Form -->
+        <div *ngIf="showAddForm || isEditing" class="helper-form">
+            <h2>{{isEditing?'Edit Helper' : 'Add New Helper'}}</h2>
+            <app-custom-button label="Cancel" icon="close" ngClass="">
+            </app-custom-button>
+
+            <form [formGroup]="helperForm" (ngSubmit)="saveHelper()">
+                <div class="form-row">
+                    <div class="custom-input-group">
+                        <label>Employee Code *</label>
+                        <input type="text" class="custom-input" formControlName="employeeCode"
+                            placeholder="Enter employee code" />
+                    </div>
+                    <div class="custom-input-group">
+                        <label>Full Name *</label>
+                        <input type="text" class="custom-input" formControlName="name" placeholder="Enter full name" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="custom-select-group">
+                        <label>Service Type *</label>
+                        <select class="custom-select" formControlName="type">
+                            <option value="">Select service type</option>
+                            <option value="Nurse">Nurse</option>
+                            <option value="Driver">Driver</option>
+                            <option value="Newspaper">Newspaper</option>
+                            <option value="Laundry">Laundry</option>
+                            <option value="Maid">Maid</option>
+                            <option value="Plumber">Plumber</option>
+                            <option value="Cook">Cook</option>
+                        </select>
+                    </div>
+                    <div class="custom-input-group">
+                        <label>Organization *</label>
+                        <input type="text" class="custom-input" formControlName="organization"
+                            placeholder="Enter organization name" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="custom-select-group">
+                        <label>Gender *</label>
+                        <select class="custom-select" formControlName="gender">
+                            <option value="">Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="custom-input-group">
+                        <label>Mobile Number *</label>
+                        <input type="tel" class="custom-input" formControlName="mobileNo"
+                            placeholder="Enter mobile number" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="custom-input-group">
+                        <label>Email ID</label>
+                        <input type="email" class="custom-input" formControlName="emailId"
+                            placeholder="Enter email address" />
+                    </div>
+                    <div class="custom-input-group">
+                        <label>Joined On *</label>
+                        <input type="date" class="custom-input" formControlName="joinedOn" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="custom-input-group">
+                        <label>Number of Households *</label>
+                        <input type="number" class="custom-input" formControlName="households"
+                            placeholder="Enter number of households" min="0" />
+                    </div>
+                    <div class="custom-select-group">
+                        <label>Vehicle Type</label>
+                        <select class="custom-select" formControlName="vechileType">
+                            <option value="">Select vehicle type</option>
+                            <option value="Bike">Bike</option>
+                            <option value="Car">Car</option>
+                            <option value="Cycle">Cycle</option>
+                            <option value="Bus">Bus</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="custom-input-group">
+                        <label>Vehicle Number</label>
+                        <input type="text" class="custom-input" formControlName="vechileNumber"
+                            placeholder="Enter vehicle number" />
+                    </div>
+                    <div class="custom-input-group">
+                        <label>Languages (comma separated)</label>
+                        <input type="text" class="custom-input" formControlName="language"
+                            placeholder="e.g., English, Hindi, Telugu" />
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="custom-btn secondary-btn" (click)="cancelForm()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="custom-btn primary-btn" [disabled]="!helperForm.valid">
+                        {{isEditing ? 'Update Helper' : 'Add Helper'}}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Helper Details View -->
+        <div *ngIf="selectedHelper && !showAddForm && !isEditing" class="helper-details">
+            <div class="details-header">
+                <div class="helper-profile">
+                    <div class="profile-avatar">
+                        <mat-icon>person</mat-icon>
+                    </div>
+                    <div class="profile-info">
+                        <h2>{{selectedHelper.name}}</h2>
+                        <p class="employee-code">{{selectedHelper.employeeCode}}</p>
+                        <span class="service-badge" [class]="'badge-' + selectedHelper.type.toLowerCase()">
+                            {{selectedHelper.type}}
+                        </span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="custom-btn secondary-btn" (click)="editHelper()">
+                        <mat-icon>edit</mat-icon>
+                        Edit
+                    </button>
+                    <button class="custom-btn danger-btn" (click)="deleteHelper()">
+                        <mat-icon>delete</mat-icon>
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <div class="details-content">
+                <div class="detail-section">
+                    <h3>Personal Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Gender</label>
+                            <span>{{selectedHelper.gender}}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Mobile Number</label>
+                            <span>{{selectedHelper.mobileNo}}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Email ID</label>
+                            <span>{{selectedHelper.emailId || 'Not provided'}}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Languages</label>
+                            <span>{{selectedHelper.language.join(', ')}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Work Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Organization</label>
+                            <span>{{selectedHelper.organization}}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Joined On</label>
+                            <span>{{selectedHelper.joinedOn | date:'mediumDate'}}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Households Served</label>
+                            <span>{{selectedHelper.households}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section" *ngIf="selectedHelper.vechileType">
+                    <h3>Vehicle Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Vehicle Type</label>
+                            <span>{{selectedHelper.vechileType}}</span>
+                        </div>
+                        <div class="detail-item" *ngIf="selectedHelper.vechileNumber">
+                            <label>Vehicle Number</label>
+                            <span>{{selectedHelper.vechileNumber}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

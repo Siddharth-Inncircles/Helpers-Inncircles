@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input } from '@angular/core';
+import { Component, forwardRef, Input, EventEmitter, Output } from '@angular/core';
 import { FormControl, ReactiveFormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from "@angular/material/icon";
@@ -28,6 +28,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   @Input() icon:string = '';
   @Input() options: {value: string, label: string}[] = [];
   @Input() placeholder:string = '';
+  @Output() valueChange = new EventEmitter<string>();
 
   value : any = '';
   onChange = (value:any)=>{};
@@ -48,6 +49,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   onSelectionChange(value : any): void{
     this.value = value;
     this.onChange(value);
+    this.valueChange.emit(value);
   }
 }
 

@@ -1,6 +1,6 @@
 :root {
   --primary-color: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary-hover: #8da7ee;
   --secondary-color: #64748b;
   --success-color: #059669;
   --danger-color: #dc2626;
@@ -17,4 +17,12 @@
   --border-radius: 8px;
   --border-radius-sm: 6px;
   --transition: all 0.2s ease-in-out;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
 }

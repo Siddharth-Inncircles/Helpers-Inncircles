@@ -1,0 +1,350 @@
+<div class="custom-stepper-container">
+    <!-- Steps List - Show only if steps are enabled -->
+    <div class="steps-list" *ngIf="enableSteps && mode==='create'" style="position: sticky; top: 2px;">
+        <div class="step-item" *ngFor="let step of steps; let i = index" [class.active]="i === currentStep"
+            [class.completed]="i < currentStep" [class.clickable]="canNavigateToStep"
+            (click)="canNavigateToStep ? goToStep(i) : null">
+            <div class="step-indicator">
+                <div class="step-number">
+                    <mat-icon *ngIf="i < currentStep">check</mat-icon>
+                    <span *ngIf="i >= currentStep">{{ i + 1 }}</span>
+                </div>
+            </div>
+            <div class="step-label">{{ step.label }}</div>
+        </div>
+    </div>
+
+    <div class="steps-list-edit" *ngIf="enableSteps && mode==='edit'" style="position: sticky; top: 2px;">
+        <div class="step-item-edit" *ngFor="let step of edit_steps; let i = index" [class.active]="i === currentStep"
+            [class.completed]="i < currentStep" [class.clickable]="canNavigateToStep"
+            (click)="canNavigateToStep ? goToStep(i) : null">
+            <span class="material-symbols-outlined">
+                {{step.icon}}
+            </span>
+            <div class="step-label-edit">{{ step.label }}</div>
+        </div>
+    </div>
+
+    <!-- Step content -->
+    <div class="step-content">
+        <div [ngSwitch]="currentStep">
+
+            <!-- Step 1: Helper Details -->
+            <form *ngSwitchCase="0" [formGroup]="firstFormGroup">
+
+                <!-- Profile Image -->
+                <label class="custom-file-upload-img">
+                    <img *ngIf="imageSrc" [src]="imageSrc" class="image-preview" alt="Uploaded Image" />
+
+                    <div *ngIf="!imageSrc">
+                        <mat-icon class="profile-upload-icon-img">cloud_upload</mat-icon>
+                        <p>Upload <br> Photo</p>
+                    </div>
+
+                    <input type="file" accept="image/*" (change)="onProfileImageSelected($event)" />
+                </label>
+
+                <p style="color: grey; margin-bottom: 30px;">Upload photo (.png, .jpeg) Max size: 5MB</p>
+
+                <!-- Type of Service -->
+                <h3>Type of service <span class="required">*</span></h3>
+                <app-custom-select formControlName="type" [options]="[
+            {value:'Nurse', label:'Nurse'},
+            {value:'Driver', label:'Driver'},
+            {value:'Newspaper', label:'Newspaper'},
+            {value:'Maid', label:'Maid'},
+            {value:'Plumber', label:'Plumber'},
+            {value:'Cook', label:'Cook'},
+          ]" placeholder="Select type of Work" />
+                <div class="error" *ngIf="firstFormGroup.get('type')?.invalid && firstFormGroup.get('type')?.touched">
+                    <small *ngIf="firstFormGroup.get('type')?.errors?.['required']">Type of service is required.</small>
+                </div>
+
+                <!-- Organization Name -->
+                <h3>Organization Name <span class="required">*</span></h3>
+                <app-custom-input formControlName="organization" placeholder="Organization Name" />
+                <div class="error"
+                    *ngIf="firstFormGroup.get('organization')?.invalid && firstFormGroup.get('organization')?.touched">
+                    <small *ngIf="firstFormGroup.get('organization')?.errors?.['required']">Organization name is
+                        required.</small>
+                    <small *ngIf="firstFormGroup.get('organization')?.errors?.['minlength']">Minimum 2 characters
+                        required.</small>
+                </div>
+
+                <!-- Full Name -->
+                <h3>Full Name <span class="required">*</span></h3>
+                <app-custom-input formControlName="name" placeholder="Full Name" />
+                <div class="error" *ngIf="firstFormGroup.get('name')?.invalid && firstFormGroup.get('name')?.touched">
+                    <small *ngIf="firstFormGroup.get('name')?.errors?.['required']">Name is required.</small>
+                    <small *ngIf="firstFormGroup.get('name')?.errors?.['minlength']">Minimum 2 characters
+                        required.</small>
+                </div>
+
+                <!-- Languages -->
+                <h3>Languages <span class="required">*</span></h3>
+                <mat-form-field class="lang">
+                    <mat-label>Languages</mat-label>
+                    <mat-select multiple formControlName="language" (selectionChange)="onLanguageSelection($event)">
+                        <mat-select-trigger>
+                            {{firstFormGroup.get('language')?.value?.[0] || ''}}
+                            <span *ngIf="(firstFormGroup.get('language')?.value?.length || 0) > 1"
+                                class="example-additional-selection">
+                                (+{{(firstFormGroup.get('language')?.value?.length || 0) - 1}}
+                                {{firstFormGroup.get('language')?.value?.length === 2 ? 'other' : 'others'}})
+                            </span>
+                        </mat-select-trigger>
+                        <mat-option *ngIf="mode !== 'view'" [value]="'all'" (click)="toggleAllSelection()">
+                            {{ isAllSelected() ? '✓ All Selected' : 'Select All' }}
+                        </mat-option>
+
+                        <mat-option *ngFor="let language of languagesList; trackBy: trackByLanguage" [value]="language">
+                            {{language}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <div class="error"
+                    *ngIf="firstFormGroup.get('language')?.invalid && firstFormGroup.get('language')?.touched">
+                    <small *ngIf="firstFormGroup.get('language')?.errors?.['minArrayLength']">Select at least 1, max
+                        3.</small>
+                </div>
+
+                <!-- Gender -->
+                <h3>Gender <span class="required">*</span></h3>
+                <mat-radio-group formControlName="gender">
+                    <mat-radio-button value="Male">Male</mat-radio-button>
+                    <mat-radio-button value="Female">Female</mat-radio-button>
+                    <mat-radio-button value="Other">Other</mat-radio-button>
+                </mat-radio-group>
+                <div class="error radio"
+                    *ngIf="firstFormGroup.get('gender')?.invalid && firstFormGroup.get('gender')?.touched">
+                    <small *ngIf="firstFormGroup.get('gender')?.errors?.['required']">Gender is required.</small>
+                </div>
+
+                <!-- Phone -->
+                <h3>Phone <span class="required">*</span></h3>
+                <app-custom-input formControlName="mobileNo" placeholder="Phone Number" value="+91 " />
+                <div class="error"
+                    *ngIf="firstFormGroup.get('mobileNo')?.invalid && firstFormGroup.get('mobileNo')?.touched">
+                    <small *ngIf="firstFormGroup.get('mobileNo')?.errors?.['required']">Mobile Number is
+                        required.</small>
+                    <small *ngIf="firstFormGroup.get('mobileNo')?.errors?.['pattern']">Enter valid mobile
+                        number.</small>
+                </div>
+
+                <!-- Email -->
+                <h3>Email <span class="required">*</span></h3>
+                <app-custom-input formControlName="email" placeholder="example@abc.com" />
+                <div class="error" *ngIf="firstFormGroup.get('email')?.invalid && firstFormGroup.get('email')?.touched">
+                    <small *ngIf="firstFormGroup.get('email')?.errors?.['pattern']">Enter valid email address.</small>
+                </div>
+
+                <!-- Vehicle -->
+                <h3>Vehicle</h3>
+                <app-custom-select formControlName="vehicleType" [options]="[
+            {value:'', label:'None'},
+            {value:'Bike', label:'Bike'},
+            {value:'Car', label:'Car'},
+            {value:'Cycle', label:'Cycle'},
+            {value:'Other', label:'Other'}
+          ]" placeholder="Select type of Work" />
+
+                <app-custom-input
+                    *ngIf="firstFormGroup.get('vehicleType')?.value!='' && firstFormGroup.get('vehicleType')?.value!='cycle'"
+                    formControlName="vehicleNumber" placeholder="AB1204BR" />
+
+                <!-- KYC Document -->
+                <h3>KYC Document <span class="required">*</span></h3>
+
+                <button type="button" class="custom-file-upload" (click)="openDialogForKyc()">
+                    <mat-icon class="kyc-icon">note_add</mat-icon>
+                </button>
+
+                <!-- Show validation error -->
+                <div class="error"
+                    *ngIf="firstFormGroup.get('kycDocument')?.invalid && firstFormGroup.get('kycDocument')?.touched">
+                    <small>KYC document is required.</small>
+                </div>
+
+                <!-- Optionally show file name -->
+                <div *ngIf="selectedFileName" style="display: flex; align-items: center;">
+                    <mat-icon
+                        style="color: red; padding: 15px; font-size: 35px; height: 35px; width: 35px;">picture_as_pdf</mat-icon>
+                    <p>Selected: {{selectedFileName}}</p>
+                </div>
+
+                <!-- Actions for Step 1 -->
+                <div class="actions">
+                    <button *ngIf="showCancelButton" mat-button type="button" (click)="onCancel()">
+                        Cancel
+                    </button>
+                    <button mat-raised-button color="primary" type="button" (click)="nextStep()">
+                        Next
+                    </button>
+                </div>
+            </form>
+
+            <!-- Step 2: Documents -->
+            <form *ngSwitchCase="1" [formGroup]="secondFormGroup">
+                <h3>Additional Documents</h3>
+                <p style="color: grey;">Upload related documents. This step is optional.</p>
+                <p style="color: grey;" *ngIf="mode === 'view'">Additional documents uploaded.</p>
+
+                <label *ngIf="mode !== 'view'" class="custom-file-upload" (click)="openDialogForAddnPdfs()">
+                    <mat-icon class="kyc-icon">note_add</mat-icon>
+                </label>
+
+                <div *ngIf="selectedAddnName" style="display: flex; align-items: center;">
+                    <mat-icon
+                        style="color: red; padding: 15px; font-size: 35px; height: 35px; width: 35px;">picture_as_pdf</mat-icon>
+                    <p>Selected: {{selectedAddnName}}</p>
+                </div>
+
+                <div *ngIf="mode === 'view' && !selectedAddnName" class="no-documents">
+                    <p style="color: #999; font-style: italic;">No additional documents uploaded.</p>
+                </div>
+
+                <div class="actions">
+                    <button mat-button type="button" (click)="previousStep()">Previous</button>
+                    <button *ngIf="showCancelButton && mode !== 'view'" mat-button type="button" (click)="onCancel()">
+                        Cancel
+                    </button>
+                    <button mat-raised-button *ngIf="mode==='create'" color="primary" type="button"
+                        (click)="nextStep()">
+                        Next
+                    </button>
+                    <app-custom-button *ngIf="mode==='edit'" [label]="submitButtonText" icon="add"
+                        (click)="onSubmit()" />
+                </div>
+            </form>
+
+            <!-- Step 3: Review -->
+            <div *ngSwitchCase="2">
+                <h3>Review Details</h3>
+
+                <div style="display: flex;">
+                    <label class="custom-file-upload-img">
+                        <img *ngIf="imageSrc; else noImg" [src]="imageSrc" class="image-preview" alt="Uploaded Image" />
+
+                        <ng-template #noImg>
+                            <div class="initials-box">
+                                {{ getInitials(firstFormGroup.get('name')?.value) }}
+                            </div>
+                        </ng-template>
+                    </label>
+
+                    <div style="align-items: center; justify-content: center; padding-top: 30px;">
+                        <h4 style="font-weight: bold;">{{ firstFormGroup.get('name')?.value | uppercase}}</h4>
+                        <p style="color: gray;">{{firstFormGroup.get('type')?.value | uppercase}}</p>
+                    </div>
+                </div>
+
+                <div class="section-title-with-line">
+                    <h4>PERSONAL DETAILS</h4>
+                    <div class="line"></div>
+                </div>
+
+                <div class="review-section-grid">
+                    <!-- Gender -->
+                    <div class="review-item">
+                        <p class="review-key">Gender</p>
+                        <p class="review-value">{{ firstFormGroup.get('gender')?.value }}</p>
+                    </div>
+
+                    <!-- Languages -->
+                    <div class="review-item">
+                        <h4 class="review-key">Languages:</h4>
+                        <p>{{ firstFormGroup.get('language')?.value?.join(', ') }}</p>
+                    </div>
+
+                    <!-- Mobile -->
+                    <div class="review-item">
+                        <h4 class="review-key">Mobile Number:</h4>
+                        <p>{{ firstFormGroup.get('mobileNo')?.value }}</p>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="review-item">
+                        <h4 class="review-key">Email:</h4>
+                        <p>{{ firstFormGroup.get('email')?.value }}</p>
+                    </div>
+
+                    <!-- KYC Document -->
+                    <div class="review-item">
+                        <h4 class="review-key">KYC Document:</h4>
+                        <div *ngIf="kycDocumentUrl; else noKyc">
+                            <div
+                                style="display: flex; align-items: center; padding: 10px; border-radius: 8px; max-width: 100%;flex-wrap: wrap;">
+                                <mat-icon style="color: #1976d2; font-size: 24px;">remove_red_eye</mat-icon>
+
+                                <img *ngIf="isImage(kycDocumentUrl)" [src]="kycDocumentUrl" alt="KYC Document"
+                                    style="max-width: 200px; max-height: 150px; border-radius: 4px;" />
+
+                                <a *ngIf="!isImage(kycDocumentUrl)" [href]="kycDocumentUrl" target="_blank"
+                                    style="font-weight: 500;color: #1976d2;padding: 6px 12px;">
+                                    View Document
+                                </a>
+                            </div>
+                        </div>
+
+                        <ng-template #noKyc>
+                            <p style="color: #999; font-style: italic; margin: 0;">No file selected</p>
+                        </ng-template>
+                    </div>
+
+                    <div class="section-title-with-line">
+                        <h4>SERVICE DETAILS</h4>
+                        <div class="line"></div>
+                    </div>
+
+                    <!-- Type of Service -->
+                    <div class="review-item">
+                        <h4 class="review-key">Type of Service:</h4>
+                        <p>{{ firstFormGroup.get('type')?.value }}</p>
+                    </div>
+
+                    <!-- Organization Name -->
+                    <div class="review-item">
+                        <h4 class="review-key">Organization Name:</h4>
+                        <p>{{ firstFormGroup.get('organization')?.value }}</p>
+                    </div>
+
+                    <!-- Vehicle -->
+                    <div class="review-item">
+                        <h4 class="review-key">Vehicle Type:</h4>
+                        <p>{{ firstFormGroup.get('vehicleType')?.value || 'None' }}</p>
+                    </div>
+
+                    <div class="review-item" *ngIf="firstFormGroup.get('vehicleNumber')?.value">
+                        <h4 class="review-key">Vehicle Number:</h4>
+                        <p>{{ firstFormGroup.get('vehicleNumber')?.value }}</p>
+                    </div>
+
+                    <!-- Additional Documents -->
+                    <div class="review-item">
+                        <h4 class="review-key">Additional Documents:</h4>
+                        <div *ngIf="additionalPdfUrl; else noAddn">
+                            <a [href]="additionalPdfUrl" target="_blank" style="font-weight: 500;color: #1976d2;">View
+                                Additional Document</a>
+                        </div>
+                        <ng-template #noAddn>
+                            <p style="color: #999; font-style: italic;">No additional document uploaded</p>
+                        </ng-template>
+                    </div>
+                </div>
+
+                <div class="last-step-action">
+                    <app-custom-button label="Previous" icon="keyboard_arrow_left" (click)="previousStep()" />
+                    <app-custom-button *ngIf="showCancelButton && mode !== 'view'" label="Cancel"
+                        (click)="onCancel()" />
+                    <app-custom-button [label]="submitButtonText" icon="add" (click)="onSubmit()" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading state -->
+        <div *ngIf="mode === 'edit' && !initialData" class="loading-state">
+            <mat-spinner></mat-spinner>
+            <p>Loading helper data...</p>
+        </div>
+    </div>
+</div>

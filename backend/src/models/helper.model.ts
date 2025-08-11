@@ -12,10 +12,23 @@ export interface IHelper extends Document {
     emailId?: string;
     joinedOn: Date;
     households: number;
-    vechileType: 'Bike' | 'Car' | 'Cycle' | 'Bus' | 'Other';
+    vechileType: 'Bike' | 'Car' | 'Cycle' | 'Bus' | 'Other' | 'None';
     vechileNumber?: string;
-    kycDocument?: Buffer;
-    additionalPdfs?: Buffer[];
+    kycDocument?: {
+        data: Buffer,
+        filename: string,
+        mimetype: string,
+    };
+    additionalPdfs?: {
+        data: Buffer,
+        filename: string,
+        mimetype: string,
+    }[];
+    profileImage?: {
+        data: Buffer,
+        filename: string,
+        mimetype: string,
+    };
     identificationCard?: string;
     createdAt: Date;
     updatedAt: Date;
@@ -25,7 +38,7 @@ export interface IHelper extends Document {
 const HelperSchema: Schema = new Schema({
     employeeCode: {
         type: String,
-        require: true,
+        required: true,
         unique: true,
         trim: true,
     },
@@ -77,22 +90,46 @@ const HelperSchema: Schema = new Schema({
     },
     vechileType: {
         type: String,
-        enum: ['Bike', 'Car', 'Cycle', 'Bus', 'Other']
+        enum: ['Bike', 'Car', 'Cycle', 'Bus', 'Other', 'None']
     },
     vechileNumber: {
         type: String,
         trim: true,
     },
-    kycDocument :{
-        type: Buffer,
+
+    kycDocument: {
+        data: {
+            type: Buffer,
+            required: true
+        },
+        filename: {
+            type: String,
+            required: true
+        },
+        mimetype: {
+            type: String,
+            required: true
+        }
     },
+
     additionalPdfs: [{
-        type: Buffer
+        data: Buffer,
+        filename: String,
+        mimetype: String
     }],
+
+    profileImage: {
+        data: Buffer,
+        filename: String,
+        mimetype: String
+    },
+
     identificationCard: {
-        type: Buffer,
-    }
-}, {timestamps:true});
+        type: String,
+    },
+
+}, { timestamps: true });
+
 
 
 export default mongoose.model<IHelper>('Helper', HelperSchema);

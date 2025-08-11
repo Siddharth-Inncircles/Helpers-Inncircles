@@ -1,0 +1,10 @@
+<div class="helper-edit-container">
+    <h2 class="edit-heading"><span class="material-symbols-outlined" (click)="onFormCancel()">
+            arrow_back_ios_new
+        </span>Edit Helper</h2>
+
+    <app-helper-form-reusable mode="edit" [initialData]="helperData" submitButtonText="Update Helper"
+        [showCancelButton]="true" [enableSteps]="true" (formSubmit)="onFormSubmit($event)" (formCancel)="onFormCancel()"
+        (formDataChange)="onFormDataChange($event)">
+    </app-helper-form-reusable>
+</div>

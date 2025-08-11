@@ -1,7 +1,11 @@
 import { Express, Request, Response } from "express";
 import { HelperService } from "../services/helper.service";
 import { validationResult } from "express-validator";
+import helperModel from "../models/helper.model";
 
+interface MulterFiles {
+    [fieldname: string]: Express.Multer.File[];
+}
 
 export class HelperController {
     helperService: HelperService;
@@ -10,33 +14,73 @@ export class HelperController {
         this.helperService = new HelperService();
     }
 
+
     createHelper = async (req: Request, res: Response): Promise<void> => {
         try {
-            console.log(req.body);
+            // console.log('BODY:', req.body);
+            // console.log('FILES:', req.files);
+
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 res.status(400).json({
                     success: false,
                     message: 'Validation errors',
                     errors: errors.array()
-                })
+                });
                 return;
             }
 
-            const helper = await this.helperService.CreateHelper(req.body);
+            const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+            const lastCode = await this.helperService.GetLastEmployeeCode();
+
+            let newEmployeeCode = 'EMP001';
+            if (lastCode) {
+                const num = parseInt(lastCode.replace('EMP', ''), 10);
+                const nextNum = num + 1;
+                newEmployeeCode = `EMP${nextNum.toString().padStart(3, '0')}`;
+            }
+
+            const helper = await this.helperService.CreateHelper({
+                ...req.body,
+                employeeCode: newEmployeeCode,
+
+                profileImage: files?.profileImage?.[0] ? {
+                    data: files.profileImage[0].buffer,
+                    filename: files.profileImage[0].originalname,
+                    mimetype: files.profileImage[0].mimetype
+                } : undefined,
+
+                kycDocument: files?.kycDocument?.[0] ? {
+                    data: files.kycDocument[0].buffer,
+                    filename: files.kycDocument[0].originalname,
+                    mimetype: files.kycDocument[0].mimetype
+                } : undefined,
+
+                additionalPdfs: files?.additionalPdfs?.map((file) => ({
+                    data: file.buffer,
+                    filename: file.originalname,
+                    mimetype: file.mimetype
+                })) || []
+            });
+
             res.status(201).json({
                 success: true,
                 message: 'Helper created successfully',
                 data: helper
-            })
+            });
+
         } catch (error) {
+            console.log(error);
             res.status(500).json({
                 success: false,
-                message: 'Validation errors',
+                message: 'Internal server error',
                 error,
-            })
+            });
         }
-    }
+    };
+
+
 
     getAllHelpers = async (req: Request, res: Response): Promise<void> => {
         try {
@@ -98,7 +142,26 @@ export class HelperController {
                 });
                 return;
             }
-            const helper = await this.helperService.updateHelper(req.params.id, req.body);
+
+            //   console.log('Params ID:', req.params.id);
+            const files = req.files as MulterFiles;
+
+            console.log('Body:', req.body);
+            console.log('Files:', files);
+
+            const profileImage = files?.['profileImage']?.[0] || null;
+            const kycDocument = files?.['kycDocument']?.[0] || null;
+            const additionalPdfs = files?.['additionalPdfs']?.[0] || null;
+
+            const updatePayload = {
+                ...req.body,
+                profileImage,
+                kycDocument,
+                additionalPdfs
+            };
+
+            const helper = await this.helperService.updateHelper(req.params.id, updatePayload);
+
             if (!helper) {
                 res.status(404).json({
                     success: false,
@@ -106,11 +169,13 @@ export class HelperController {
                 });
                 return;
             }
+
             res.status(200).json({
                 success: true,
                 message: 'Helper updated successfully',
                 data: helper
             });
+
         } catch (error: any) {
             res.status(500).json({
                 success: false,
@@ -119,6 +184,7 @@ export class HelperController {
             });
         }
     };
+
 
 
     deleteHelper = async (req: Request, res: Response): Promise<void> => {
@@ -138,7 +204,7 @@ export class HelperController {
                 message: 'Helper deleted successfully',
                 data: helper,
             })
-        } catch (error : any) {
+        } catch (error: any) {
             res.status(500).json({
                 success: false,
                 message: 'Error updating helper',

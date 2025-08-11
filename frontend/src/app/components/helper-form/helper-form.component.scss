@@ -1,168 +1,21 @@
-
-
-.custom-stepper-container {
-  display: flex;
-  gap: 24px;
+.helper-form-container {
+  padding: 20px;
+  margin: 0 auto;
 }
 
-.steps-list {
-  display: flex;
-  flex-direction: column;
-  width: 200px;
-}
-
-.step-item {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  cursor: pointer;
-  border-left: 4px solid transparent;
-  transition: 0.3s;
-}
-
-.step-item.active {
-  border-left: 4px solid #3f51b5;
-  background: rgba(63, 81, 181, 0.1);
-}
-
-.step-number {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 8px;
-  font-weight: bold;
-}
-
-.step-item.active .step-number {
-  background: #3f51b5;
-  color: #fff;
-}
-
-.step-content {
-  flex: 1;
-}
-
-.actions {
-  margin-top: 20px;
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
 }
 
 
-.custom-file-upload-img {
-  height: 110px;
-  width: 110px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  margin: 10px 25px;
-  cursor: pointer;
-  background-color: #c3d0e1;
-  color: rgb(4, 2, 2);
-  border-radius: 100%;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-  border: 2px dashed rgb(5, 54, 200);
+.add-heading{
+    display: flex;
+    align-items: center;
 }
 
-.custom-file-upload-img:hover {
-  background-color: #f0f0f0;
-}
-
-.custom-file-upload-img input[type="file"] {
-  display: none;
-}
-
-.profile-upload-icon-img {
-  font-size: 50px;
-  height: 50px;
-  width: 50px;
-  color: #3f51b5;
-}
-
-.preview-img {
-  display: block;
-  margin-top: 10px;
-  max-height: 120px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-
-
-.lang{
-  width: 100%;
-}
-
-.required{
-  color: red;
-}
-
-.custom-file-upload {
-  height: 100px;
-  width: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  cursor: pointer;
-  background-color: #c3d0e1;
-  color: white;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-  border: 3px dashed rgb(251, 124, 124);
-  
-}
-
-.custom-file-upload {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.custom-file-upload:hover {
-  background-color: #e0e0e0;
-}
-
-.custom-file-upload input[type="file"] {
-  display: none;
-}
-
-.kyc-icon {
-  font-size: 50px;
-  height: 50px;
-  width: 50px;
-  color: #3f51b5;
-}
-
-.error small {
-  color: red;
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-.file-name {
-  margin-top: 5px;
-  font-size: 14px;
-  color: #555;
-}
-
-
-.error{
-  color: red;
-  margin-top: -20px;
-  margin-bottom: 10px;
-
-  .radio{
-    margin-top: 50px;
-  }
+.material-symbols-outlined{
+    padding-right: 10px;
+    cursor: pointer;
 }

@@ -1,0 +1,172 @@
+.id-card-dialog {
+    min-width: 400px;
+    max-width: 500px;
+}
+
+.id-card {
+    width: 100%;
+    max-width: 400px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    color: white;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.id-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    transform: rotate(45deg);
+}
+
+.id-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.company-logo {
+    margin-right: 15px;
+}
+
+.company-logo mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.company-info h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.company-info p {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.id-card-body {
+    position: relative;
+    z-index: 1;
+}
+
+.profile-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info h2 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.profile-info p {
+    margin: 3px 0;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.employee-code {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    font-size: 11px !important;
+}
+
+.designation {
+    font-weight: 500;
+    color: #ffd700;
+}
+
+.qr-section {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.qr-code {
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.qr-code img {
+    width: 80px;
+    height: 80px;
+    display: block;
+}
+
+.loading {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #333;
+}
+
+.qr-label {
+    font-size: 11px;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.id-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.id-card-footer small {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+[mat-dialog-actions] {
+    justify-content: center;
+    padding: 20px 0;
+}
+
+[mat-dialog-actions] button {
+    margin: 0 5px;
+}

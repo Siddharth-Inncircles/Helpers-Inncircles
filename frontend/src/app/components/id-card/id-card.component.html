@@ -1,0 +1,69 @@
+<div class="id-card-dialog">
+      <div mat-dialog-content>
+        <div class="id-card">
+          <div class="id-card-header">
+            <div class="company-logo">
+              <mat-icon>business</mat-icon>
+            </div>
+            <div class="company-info">
+              <h3>{{ helperData.organization }}</h3>
+              <p>Employee ID Card</p>
+            </div>
+          </div>
+
+          <div class="id-card-body">
+            <div class="profile-section">
+              <div class="profile-image">
+                <img 
+                  [src]="profileImageUrl || 'assets/default-avatar.png'" 
+                  [alt]="helperData.name"
+                  (error)="onImageError($event)"
+                />
+              </div>
+              <div class="profile-info">
+                <h2>{{ helperData.name }}</h2>
+                <p class="employee-code">ID: {{ helperData.employeeCode }}</p>
+                <p class="designation">{{ helperData.type }}</p>
+                <p class="mobile">📱 {{ helperData.mobileNo }}</p>
+                <p class="email" *ngIf="helperData.emailId">✉️ {{ helperData.emailId }}</p>
+              </div>
+            </div>
+
+            <div class="qr-section">
+              <div class="qr-code">
+                <img 
+                  [src]="qrCodeUrl" 
+                  alt="QR Code"
+                  *ngIf="qrCodeUrl"
+                />
+                <div class="loading" *ngIf="!qrCodeUrl">
+                  Generating QR...
+                </div>
+              </div>
+              <p class="qr-label">Scan for Details</p>
+            </div>
+          </div>
+
+          <div class="id-card-footer">
+            <div class="validity">
+              <small>Valid from: {{ currentDate | date:'MMM yyyy' }}</small>
+            </div>
+            <div class="security">
+              <small>Security Code: {{ securityCode }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div mat-dialog-actions>
+        <button mat-raised-button color="primary" (click)="downloadCard()">
+          <mat-icon>download</mat-icon>
+          Download
+        </button>
+        <button mat-raised-button (click)="printCard()">
+          <mat-icon>print</mat-icon>
+          Print
+        </button>
+        <button mat-button (click)="closeDialog()">Close</button>
+      </div>
+    </div>

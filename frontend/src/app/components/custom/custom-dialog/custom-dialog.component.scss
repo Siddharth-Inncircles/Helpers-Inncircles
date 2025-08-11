@@ -1,0 +1,45 @@
+
+.dialog-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dialog-header .close{
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+
+.custom-file-upload-dialog {
+  height: 100px;
+  width: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 8px 16px;
+  cursor: pointer;
+  background-color: #c3d0e1;
+  color: white;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  border: 2px dashed var(--primary-color);
+  
+}
+
+.custom-file-upload-dialog:hover {
+  background-color: var(--primary-hover);
+}
+
+.custom-file-upload-dialog input[type="file"] {
+  display: none;
+}
+
+.kyc-icon {
+  font-size: 50px;
+  height: 50px;
+  width: 50px;
+  color: var(--primary-color)
+}

@@ -1,0 +1,26 @@
+<div class="dialog-header">
+    <h2 mat-dialog-title>{{header}}</h2>
+    <mat-icon class="close" mat-dialog-close="yes">close</mat-icon>
+</div>
+
+<hr>
+
+<mat-dialog-content>
+    <p *ngIf="lists"> Select Document Type</p>
+    <app-custom-select *ngIf="lists" [options]="lists " [placeholder]="'Select Documnet Type'" (valueChange)="onTypeSelected($event)"/>
+
+    <p>Please ensure both sides of the document are uploaded.</p>
+    <label class="custom-file-upload-dialog">
+        <mat-icon class="kyc-icon">note_add</mat-icon>
+        <input type="file" (change)="onFileSelected($event)"/>
+        <p> <span style="color: var(--primary-color);">Click to upload</span> or drag and drop </p>
+    </label>
+    <div *ngIf="selectedFileName" style="display: flex; align-items: center;">
+        <mat-icon style="color: red; padding: 15px; font-size: 35px; height: 35px; width: 35px;">picture_as_pdf</mat-icon> 
+        <p >Selected: {{selectedFileName}}</p>
+    </div >
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>No</button>
+    <button mat-button color="primary" mat-dialog-close="yes" (click)="closeDialogWithFile()">Yes</button>
+</mat-dialog-actions>

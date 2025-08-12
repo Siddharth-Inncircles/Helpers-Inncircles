@@ -2,8 +2,8 @@
     <!-- Steps List - Show only if steps are enabled -->
     <div class="steps-list" *ngIf="enableSteps && mode==='create'" style="position: sticky; top: 2px;">
         <div class="step-item" *ngFor="let step of steps; let i = index" [class.active]="i === currentStep"
-            [class.completed]="i < currentStep" [class.clickable]="canNavigateToStep"
-            (click)="canNavigateToStep ? goToStep(i) : null">
+            [class.completed]="i < currentStep" [class.clickable]="enableSteps"
+            (click)="enableSteps ? goToStep(i) : null">
             <div class="step-indicator">
                 <div class="step-number">
                     <mat-icon *ngIf="i < currentStep">check</mat-icon>
@@ -16,8 +16,8 @@
 
     <div class="steps-list-edit" *ngIf="enableSteps && mode==='edit'" style="position: sticky; top: 2px;">
         <div class="step-item-edit" *ngFor="let step of edit_steps; let i = index" [class.active]="i === currentStep"
-            [class.completed]="i < currentStep" [class.clickable]="canNavigateToStep"
-            (click)="canNavigateToStep ? goToStep(i) : null">
+            [class.completed]="i < currentStep" [class.clickable]="enableSteps"
+            (click)="enableSteps ? goToStep(i) : null">
             <span class="material-symbols-outlined">
                 {{step.icon}}
             </span>
@@ -93,7 +93,7 @@
                                 {{firstFormGroup.get('language')?.value?.length === 2 ? 'other' : 'others'}})
                             </span>
                         </mat-select-trigger>
-                        <mat-option *ngIf="mode !== 'view'" [value]="'all'" (click)="toggleAllSelection()">
+                        <mat-option [value]="'all'" (click)="toggleAllSelection()">
                             {{ isAllSelected() ? '✓ All Selected' : 'Select All' }}
                         </mat-option>
 
@@ -187,9 +187,8 @@
             <form *ngSwitchCase="1" [formGroup]="secondFormGroup">
                 <h3>Additional Documents</h3>
                 <p style="color: grey;">Upload related documents. This step is optional.</p>
-                <p style="color: grey;" *ngIf="mode === 'view'">Additional documents uploaded.</p>
 
-                <label *ngIf="mode !== 'view'" class="custom-file-upload" (click)="openDialogForAddnPdfs()">
+                <label class="custom-file-upload" (click)="openDialogForAddnPdfs()">
                     <mat-icon class="kyc-icon">note_add</mat-icon>
                 </label>
 
@@ -199,13 +198,9 @@
                     <p>Selected: {{selectedAddnName}}</p>
                 </div>
 
-                <div *ngIf="mode === 'view' && !selectedAddnName" class="no-documents">
-                    <p style="color: #999; font-style: italic;">No additional documents uploaded.</p>
-                </div>
-
                 <div class="actions">
                     <button mat-button type="button" (click)="previousStep()">Previous</button>
-                    <button *ngIf="showCancelButton && mode !== 'view'" mat-button type="button" (click)="onCancel()">
+                    <button *ngIf="showCancelButton" mat-button type="button" (click)="onCancel()">
                         Cancel
                     </button>
                     <button mat-raised-button *ngIf="mode==='create'" color="primary" type="button"
@@ -334,8 +329,7 @@
 
                 <div class="last-step-action">
                     <app-custom-button label="Previous" icon="keyboard_arrow_left" (click)="previousStep()" />
-                    <app-custom-button *ngIf="showCancelButton && mode !== 'view'" label="Cancel"
-                        (click)="onCancel()" />
+                    <app-custom-button *ngIf="showCancelButton" label="Cancel" (click)="onCancel()" />
                     <app-custom-button [label]="submitButtonText" icon="add" (click)="onSubmit()" />
                 </div>
             </div>

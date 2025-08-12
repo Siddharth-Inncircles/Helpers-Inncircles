@@ -61,7 +61,7 @@ export interface HelperFormData {
   standalone: true,
 })
 export class HelperFormReusableComponent implements OnInit, OnChanges {
-  @Input() mode: 'create' | 'edit' | 'view' = 'create';
+  @Input() mode: 'create' | 'edit' = 'create';
   @Input() initialData: HelperFormData | null = null;
   @Input() submitButtonText: string = 'Submit';
   @Input() showCancelButton: boolean = true;
@@ -164,13 +164,8 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
   }
 
   private setupFormValidation() {
-    if (this.mode === 'view') {
-      this.firstFormGroup.disable();
-      this.secondFormGroup.disable();
-    } else {
-      this.firstFormGroup.enable();
-      this.secondFormGroup.enable();
-    }
+    this.firstFormGroup.enable();
+    this.secondFormGroup.enable();
 
     if (this.mode === 'edit') {
       if (this.hasExistingKycDocument()) {
@@ -208,8 +203,6 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
   private populateFormData(data: HelperFormData) {
     this.isInitializing = true;
 
-    // console.log('Populating form with data:', data);
-
     this.firstFormGroup.patchValue({
       type: data.type || '',
       organization: data.organization || '',
@@ -224,17 +217,14 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
     });
 
     if (data.profileImage) {
-      // console.log('Processing profile image:', data.profileImage);
       this.handleProfileImage(data.profileImage);
     }
 
     if (data.kycDocument) {
-      // console.log('Processing KYC document:', data.kycDocument);
       this.handleKycDocument(data.kycDocument);
     }
 
     if (data.additionalPdfs) {
-      // console.log('Processing additional PDFs:', data.additionalPdfs);
       this.handleAdditionalPdfs(data.additionalPdfs);
     }
 
@@ -273,8 +263,6 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
     }
   }
 
-
-
   private handleKycDocument(kycDocument: any) {
     if (typeof kycDocument === 'object' && kycDocument !== null) {
       const docUrl = kycDocument.url || kycDocument.path || kycDocument.filename;
@@ -295,30 +283,27 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
     }
   }
 
-
   private handleAdditionalPdfs(additionalPdfs: any) {
-  if (typeof additionalPdfs === 'object' && additionalPdfs !== null) {
-    const pdfUrl = additionalPdfs.url || additionalPdfs.path || additionalPdfs.filename;
-    if (pdfUrl) {
-      const byteArray = additionalPdfs.data?.data;
-      if (Array.isArray(byteArray)) {
-        const base64String = this.arrayBufferToBase64(byteArray);
-        this.additionalPdfUrl = `data:${additionalPdfs.mimetype};base64,${base64String}`;
-      } else {
-        this.additionalPdfUrl = pdfUrl;
+    if (typeof additionalPdfs === 'object' && additionalPdfs !== null) {
+      const pdfUrl = additionalPdfs.url || additionalPdfs.path || additionalPdfs.filename;
+      if (pdfUrl) {
+        const byteArray = additionalPdfs.data?.data;
+        if (Array.isArray(byteArray)) {
+          const base64String = this.arrayBufferToBase64(byteArray);
+          this.additionalPdfUrl = `data:${additionalPdfs.mimetype};base64,${base64String}`;
+        } else {
+          this.additionalPdfUrl = pdfUrl;
+        }
+
+        const pdfName = additionalPdfs.fileName ;
+        this.selectedAddnName = pdfName || 'Document';
+
+        this.secondFormGroup.patchValue({ additionalPdfs: pdfUrl });
       }
-
-      const pdfName = additionalPdfs.fileName ;
-      this.selectedAddnName = pdfName || 'Document';
-
-      this.secondFormGroup.patchValue({ additionalPdfs: pdfUrl });
     }
   }
-}
 
   onProfileImageSelected(event: Event): void {
-    if (this.mode === 'view') return;
-
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] || null;
 
@@ -348,8 +333,6 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
   }
 
   openDialogForKyc() {
-    if (this.mode === 'view') return;
-
     const dialogRef = this.dialog.open(CustomDialogComponent, {
       data: {
         header: 'Upload KYC Documents',
@@ -379,8 +362,6 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
   }
 
   openDialogForAddnPdfs() {
-    if (this.mode === 'view') return;
-
     const dialogRef = this.dialog.open(CustomDialogComponent, {
       data: {
         header: 'Upload Additional Documents'
@@ -407,8 +388,6 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
   }
 
   toggleAllSelection(): void {
-    if (this.mode === 'view') return;
-
     if (this.isAllSelected()) {
       this.firstFormGroup.get('language')?.setValue([]);
     } else {
@@ -422,14 +401,14 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
   }
 
   goToStep(index: number) {
-    if (!this.enableSteps && this.mode !== 'view') return;
+    if (!this.enableSteps) return;
 
     this.currentStep = index;
     this.stepChanged.emit(index);
   }
 
   nextStep() {
-    if (this.currentStep === 0 && this.mode !== 'view') {
+    if (this.currentStep === 0) {
       this.firstFormGroup.markAllAsTouched();
 
       console.log('Form validity check:', {
@@ -489,11 +468,6 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
   }
 
   onSubmit() {
-    if (this.mode === 'view') {
-      this.formCancel.emit();
-      return;
-    }
-
     if (this.firstFormGroup.valid) {
       const formData = this.getFormData();
       this.formSubmit.emit(formData);
@@ -535,16 +509,11 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
     switch (this.mode) {
       case 'create': return 'Add Helper';
       case 'edit': return 'Edit Helper';
-      case 'view': return 'View Helper Details';
       default: return 'Helper Form';
     }
   }
 
   get isFormValid(): boolean {
     return this.firstFormGroup.valid && this.secondFormGroup.valid;
-  }
-
-  get canNavigateToStep(): boolean {
-    return this.enableSteps || this.mode === 'view';
   }
 }

@@ -18,14 +18,9 @@ export class HelperService {
                 { employeeCode: { $regex: searchQuery, $options: 'i', } },
             ]
         }
-
         if (type) {
             filter.type = type;
         }
-
-
-
-
         return HelperModel.aggregate(
             [
                 { $match: filter },
@@ -54,8 +49,6 @@ export class HelperService {
             ]
         )
     }
-
-
 
     async getHelperss(req: any){
         try {
@@ -105,7 +98,6 @@ export class HelperService {
             }
         ])
     }
-
 
     async GetLastEmployeeCode(): Promise<string | null> {
         const lastHelper = await HelperModel

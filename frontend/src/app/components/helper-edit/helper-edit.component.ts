@@ -133,7 +133,6 @@ private updateHelper(formData: HelperFormData) {
     });
   }
 
-  // Handle profile image - only append if it's a new File
   if (formData.profileImage instanceof File) {
     // console.log('Uploading new profile image file');
     processedFormData.append('profileImage', formData.profileImage);

@@ -115,7 +115,7 @@
                     <mat-radio-button value="Female">Female</mat-radio-button>
                     <mat-radio-button value="Other">Other</mat-radio-button>
                 </mat-radio-group>
-                <div class="error radio"
+                <div class="error-e"
                     *ngIf="firstFormGroup.get('gender')?.invalid && firstFormGroup.get('gender')?.touched">
                     <small *ngIf="firstFormGroup.get('gender')?.errors?.['required']">Gender is required.</small>
                 </div>
@@ -160,7 +160,7 @@
                 </button>
 
                 <!-- Show validation error -->
-                <div class="error"
+                <div class="error-e"
                     *ngIf="firstFormGroup.get('kycDocument')?.invalid && firstFormGroup.get('kycDocument')?.touched">
                     <small>KYC document is required.</small>
                 </div>

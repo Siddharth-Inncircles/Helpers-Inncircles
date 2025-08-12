@@ -26,7 +26,7 @@ export class HelperFormComponent {
   constructor(private http: HttpClient, private helperService: HelperService, private router: Router) { }
 
   onFormSubmit(formData: HelperFormData) {
-    console.log('Form submitted with data:', formData);
+    // console.log('Form submitted with data:', formData);
     this.processFormData(formData);
   }
 
@@ -35,7 +35,7 @@ export class HelperFormComponent {
   }
 
   onStepChanged(step: number) {
-    console.log('Current step:', step);
+    // console.log('Current step:', step);
   }
 
   private processFormData(formData: HelperFormData) {
@@ -84,7 +84,7 @@ export class HelperFormComponent {
     this.helperService.addHelper(formData).subscribe({
       next: (res) => {
         if (res.success) {
-          console.log('Helper added successfully', res.data);
+          // console.log('Helper added successfully', res.data);
           this.showSuccessFlow(res.data);
         } else {
           console.error('Failed to add helper:', res);
@@ -103,7 +103,7 @@ export class HelperFormComponent {
       disableClose: true,
       panelClass: 'success-dialog-panel'
     });
-    console.log(helperData);
+    // console.log(helperData);
     
     setTimeout(() => {
       successDialogRef.close();
@@ -120,7 +120,7 @@ export class HelperFormComponent {
     });
 
     idDialogRef.afterClosed().subscribe(() => {
-      console.log("ID card dialog closed");
+      // console.log("ID card dialog closed");
       this.router.navigate(['/']);
     });
   }

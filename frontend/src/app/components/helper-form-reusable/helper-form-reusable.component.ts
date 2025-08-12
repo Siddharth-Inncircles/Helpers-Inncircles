@@ -208,7 +208,7 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
   private populateFormData(data: HelperFormData) {
     this.isInitializing = true;
 
-    console.log('Populating form with data:', data);
+    // console.log('Populating form with data:', data);
 
     this.firstFormGroup.patchValue({
       type: data.type || '',
@@ -224,17 +224,17 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
     });
 
     if (data.profileImage) {
-      console.log('Processing profile image:', data.profileImage);
+      // console.log('Processing profile image:', data.profileImage);
       this.handleProfileImage(data.profileImage);
     }
 
     if (data.kycDocument) {
-      console.log('Processing KYC document:', data.kycDocument);
+      // console.log('Processing KYC document:', data.kycDocument);
       this.handleKycDocument(data.kycDocument);
     }
 
     if (data.additionalPdfs) {
-      console.log('Processing additional PDFs:', data.additionalPdfs);
+      // console.log('Processing additional PDFs:', data.additionalPdfs);
       this.handleAdditionalPdfs(data.additionalPdfs);
     }
 
@@ -418,7 +418,7 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
 
   isAllSelected(): boolean {
     const selected = this.firstFormGroup.get('language')?.value || [];
-    return selected.length === this.languagesList.length;
+    return selected.length === this.languagesList.length+1;
   }
 
   goToStep(index: number) {

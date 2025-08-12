@@ -1,7 +1,6 @@
 import { Express, Request, Response } from "express";
 import { HelperService } from "../services/helper.service";
 import { validationResult } from "express-validator";
-import helperModel from "../models/helper.model";
 
 interface MulterFiles {
     [fieldname: string]: Express.Multer.File[];
@@ -143,21 +142,28 @@ export class HelperController {
                 return;
             }
 
-            //   console.log('Params ID:', req.params.id);
-            const files = req.files as MulterFiles;
-
-            console.log('Body:', req.body);
-            console.log('Files:', files);
-
-            const profileImage = files?.['profileImage']?.[0] || null;
-            const kycDocument = files?.['kycDocument']?.[0] || null;
-            const additionalPdfs = files?.['additionalPdfs']?.[0] || null;
+            const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
             const updatePayload = {
                 ...req.body,
-                profileImage,
-                kycDocument,
-                additionalPdfs
+
+                profileImage: files?.profileImage?.[0] ? {
+                    data: files.profileImage[0].buffer,
+                    filename: files.profileImage[0].originalname,
+                    mimetype: files.profileImage[0].mimetype
+                } : undefined,
+
+                kycDocument: files?.kycDocument?.[0] ? {
+                    data: files.kycDocument[0].buffer,
+                    filename: files.kycDocument[0].originalname,
+                    mimetype: files.kycDocument[0].mimetype
+                } : undefined,
+
+                additionalPdfs: files?.additionalPdfs?.map((file) => ({
+                    data: file.buffer,
+                    filename: file.originalname,
+                    mimetype: file.mimetype
+                })) || []
             };
 
             const helper = await this.helperService.updateHelper(req.params.id, updatePayload);
@@ -184,6 +190,7 @@ export class HelperController {
             });
         }
     };
+
 
 
 

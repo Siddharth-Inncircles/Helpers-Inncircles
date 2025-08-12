@@ -40,7 +40,7 @@ export class HelpersDisplayComponent implements OnInit {
     this.helperService.getHelpers().subscribe({
       next: (res) => {
         this.helpers = res.data;
-        console.log(this.helpers);
+        // console.log(this.helpers);
         this.filteredHelpers = [...this.helpers];
       },
       error: (err) => {
@@ -416,13 +416,13 @@ export class HelpersDisplayComponent implements OnInit {
     });
 
     idDialogRef.afterClosed().subscribe(() => {
-      console.log("ID card dialog closed");
+      // console.log("ID card dialog closed");
     })
   }
 
 
   viewDocument(doc: any) {
-    console.log(doc);
+    // console.log(doc);
 
     const base64 = doc.data;
     const byteCharacters = atob(base64);
@@ -440,8 +440,9 @@ export class HelpersDisplayComponent implements OnInit {
     if (confirm(`Are you sure you want to delete ${this.selectedHelper.name}?`)) {
       this.helperService.deleteHelper(this.selectedHelper.employeeCode).subscribe({
         next: (res) => {
-          console.log(res);
-          this.helpers = this.helpers.filter(h => h.employeeCode !== this.selectedHelper!.employeeCode);
+          // console.log(res);
+          console.log('Selected helper before delete:', this.selectedHelper);
+          this.filteredHelpers = this.helpers.filter(h => h.employeeCode !== this.selectedHelper!.employeeCode);
           this.selectedHelper = null;
         }
         ,

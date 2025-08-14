@@ -141,6 +141,8 @@ private updateHelper(formData: HelperFormData) {
     processedFormData.append('profileImageUrl', formData.profileImage);
   }
 
+  
+
   if (formData.kycDocument instanceof File) {
     // console.log('Uploading new KYC document file');
     processedFormData.append('kycDocument', formData.kycDocument);

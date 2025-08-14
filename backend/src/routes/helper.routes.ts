@@ -12,6 +12,7 @@ helperRouter.post('/', upload.fields([
     { name: 'kycDocument', maxCount: 1 },
     { name: 'additionalPdfs' }
 ]), helperController.createHelper);
+helperRouter.get('/pagination', helperController.getHelpersByPagination);
 helperRouter.get('/', helperController.getAllHelpers);
 helperRouter.get('/:id', helperController.getHelperByID);
 helperRouter.put('/:id',upload.fields([

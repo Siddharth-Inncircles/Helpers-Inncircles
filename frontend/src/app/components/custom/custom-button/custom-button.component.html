@@ -1,10 +1,28 @@
 <button 
-  class="custom-button" 
-  [ngClass]="type" 
-  [disabled]="disabled" 
+  class="custom-button"
+  [class]="type"
+  [class.icon-right]="icon_side === 'right'"
+  [class.icon-left]="icon_side === 'left'"
+  [class.icon-only]="!label && icon"
+  [disabled]="disabled"
   (click)="onClick()"
-  mat-fab extended>
+  type="button">
   
-  <mat-icon *ngIf="icon" class="button-icon">{{ icon }}</mat-icon>
-  <span>{{ label }}</span>
+  <mat-icon 
+    *ngIf="icon && icon_side === 'left'" 
+    class="button-icon">
+    {{ icon }}
+  </mat-icon>
+  
+  <span 
+    *ngIf="label" 
+    class="button-label">
+    {{ label }}
+  </span>
+  
+  <mat-icon 
+    *ngIf="icon && icon_side === 'right'" 
+    class="button-icon">
+    {{ icon }}
+  </mat-icon>
 </button>

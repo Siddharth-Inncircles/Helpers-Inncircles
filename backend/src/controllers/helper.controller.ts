@@ -33,16 +33,9 @@ export class HelperController {
 
             const lastCode = await this.helperService.GetLastEmployeeCode();
 
-            let newEmployeeCode = 'EMP001';
-            if (lastCode) {
-                const num = parseInt(lastCode.replace('EMP', ''), 10);
-                const nextNum = num + 1;
-                newEmployeeCode = `EMP${nextNum.toString().padStart(3, '0')}`;
-            }
-
             const helper = await this.helperService.CreateHelper({
                 ...req.body,
-                employeeCode: newEmployeeCode,
+                employeeCode: lastCode.toString(),
 
                 profileImage: files?.profileImage?.[0] ? {
                     data: files.profileImage[0].buffer,
@@ -79,7 +72,31 @@ export class HelperController {
         }
     };
 
-
+    getHelpersByPagination = async(req: Request, res: Response): Promise<void> => {
+        try {
+            // console.log(req.query);
+            
+            const {page, limit, sortFeild ,searchQuery, type, organizations, dateFrom, dateTo, services} = {...req.query};
+            // console.log(services);
+            
+            const helpers = await this.helperService.getAllHelperPagination(
+                page as string, limit as string, sortFeild as string, searchQuery as string, type as string,
+                organizations as string[], dateFrom as string, dateTo as string, services as string[], 
+            )
+            res.status(200).json({
+                data: helpers,
+                message: 'Helpers retreived successfully',
+                success: true,
+            })
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error while retreiving helpers',
+                error: error,
+                
+            })
+        }
+    }
 
     getAllHelpers = async (req: Request, res: Response): Promise<void> => {
         try {

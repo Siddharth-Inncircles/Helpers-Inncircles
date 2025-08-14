@@ -1,0 +1,22 @@
+.dialog-header{
+    display: flex;
+    justify-content:flex-end;
+    align-items: center;
+}
+
+mat-dialog-content {
+  font-size: 14px;
+}
+
+mat-dialog-actions {
+  margin-top: 10px;
+}
+
+.big-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  color: red;
+}
+

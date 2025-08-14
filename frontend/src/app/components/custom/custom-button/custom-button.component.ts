@@ -19,6 +19,7 @@ export class CustomButtonComponent {
   @Input() icon: string = ''; 
   @Input() type: 'primary' | 'secondary' | 'danger' = 'primary';
   @Input() disabled: boolean = false;
+  @Input() icon_side: 'left'|'right' = 'left';
 
   @Output() clicked = new EventEmitter<void>();
 

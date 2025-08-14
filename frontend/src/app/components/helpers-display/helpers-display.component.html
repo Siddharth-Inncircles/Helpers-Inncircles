@@ -6,7 +6,7 @@
                 <span class="material-symbols-outlined">
                     swap_vert
                 </span>
-                <span class="filter-label">Sort</span>
+                <!-- <span class="filter-label">Sort</span> -->
             </button>
 
             <div class="filter-dialog" *ngIf="showSortDialog" (clickOutside)="closeAllDialogs()">
@@ -30,12 +30,11 @@
         </div>
 
         <div class="filter-icon-container">
-            <button class="filter-icon-btn" [class.active]="showServiceOrgDialog || filterService || filterOrganization"
-                (click)="toggleServiceOrgDialog()" title="Service & Organization Filter">
+            <button class="filter-icon-btn" [class.active]="showServiceOrgDialog" (click)="toggleServiceOrgDialog()"
+                title="Service & Organization Filter">
                 <span class="material-symbols-outlined">
                     filter_alt
                 </span>
-                <span class="filter-label">Filter</span>
                 <span class="filter-count"
                     *ngIf="(tempSelectedServices.length!=0 || tempSelectedOrganizations.length!=0)">
                     {{ (tempSelectedServices.length!=0 ? 1 : 0) + (tempSelectedOrganizations.length!=0 ? 1 : 0) }}
@@ -91,7 +90,7 @@
                                     (change)="toggleAllOrganizations($event)">
                                 <label for="selectAllOrgs">Select All Organizations</label>
                             </div>
-                            <div class="multiselect-option" *ngFor="let option of uniqueOrganizations"
+                            <div class="multiselect-option" *ngFor="let option of organizationOptions"
                                 [style.display]="option.value === '' ? 'none' : 'flex'">
                                 <input type="checkbox" [id]="'org-' + option.value" [value]="option.value"
                                     [checked]="tempSelectedOrganizations.includes(option.value)"
@@ -118,7 +117,6 @@
             <button class="filter-icon-btn" [class.active]="showDateDialog || filterDateFrom || filterDateTo"
                 (click)="toggleDateDialog()" title="Date Range Filter">
                 <mat-icon>date_range</mat-icon>
-                <span class="filter-label">Date</span>
                 <span class="filter-count" *ngIf="(filterDateFrom || filterDateTo)">1</span>
             </button>
 
@@ -127,7 +125,7 @@
                     <h4>Filter by Date Range</h4>
                     <button class="close-btn" (click)="closeAllDialogs()">
                         <span class="material-symbols-outlined">
-                            calendar_today
+                            close
                         </span>
                     </button>
                 </div>
@@ -157,11 +155,11 @@
 
         <div class="search-container">
             <app-custom-input [type]="'text'" [placeholder]="'Name, Employee ID, Phone'" [(ngModel)]="searchTerm"
-                (input)="filterHelpers()">
+                (input)="onSearchChange()">
             </app-custom-input>
         </div>
 
-        <p style="color: gray; display: flex; padding-top: 10px;">{{filteredHelpers.length}} helpers</p>
+        <p style="color: gray; display: flex; padding-top: 10px;">{{total}} helpers <br>Loaded {{this.filteredHelpers.length}}</p>
 
         <button class="clear-filters-btn" *ngIf="getActiveFilterCount() > 0 || searchTerm" (click)="clearAllFilters()"
             title="Clear all filters">
@@ -173,7 +171,6 @@
 
     <button class="filter-icon-btn" (click)="saveAsExcel()">
         <mat-icon>arrow_downward</mat-icon>
-        <span class="filter-label">Save</span>
     </button>
     <div class="add-button-container">
         <app-custom-button label="Add Helper" icon="add" (click)="openAddHelperForm()">
@@ -181,43 +178,48 @@
     </div>
 </div>
 
-<div class="results-summary" *ngIf="filteredHelpers.length !== helpers.length || searchTerm">
+<!-- <div class="results-summary" *ngIf="filteredHelpers.length !== helpers.length || searchTerm">
     <span>Showing {{ filteredHelpers.length }} of {{ helpers.length }} helpers</span>
-    <button class="clear-search-btn" *ngIf="searchTerm" (click)="searchTerm = ''; filterHelpers()">
+    <button class="clear-search-btn" *ngIf="searchTerm" (click)="searchTerm = ''; resetAndFetch()">
         <mat-icon>close</mat-icon>
     </button>
-</div>
+</div> -->
 
 
 
 <div class="main-content">
     <!-- Left-SideBar - Helpers List -->
     <div class="helpers-sidebar">
-        <div class="helpers-list-header">
-            <h3>Helpers ({{filteredHelpers.length}})</h3>
-        </div>
-
-        <div class="helpers-list">
+        <div #scrollContainer class="helpers-list" infinite-scroll [infiniteScrollDistance]="2"
+            [infiniteScrollThrottle]="150" (scrolled)="onScroll()" [scrollWindow]="false"
+            [infiniteScrollContainer]="scrollContainer">
             <div class="helper-item" *ngFor="let helper of filteredHelpers; trackBy:trackByHelper"
                 [class.selected]="selectedHelper?.employeeCode === helper.employeeCode" (click)="selectHelper(helper)">
                 <div class="helper-avatar">
-                    <img *ngIf="helper?.profileImage?.data ; else showIcon"
+                    <img *ngIf="helper?.profileImage?.data; else showInitials"
                         [src]="'data:' + helper.profileImage?.mimetype + ';base64,' + helper.profileImage?.data"
                         alt="Profile Image" class="profile-img" />
 
-                    <ng-template #showIcon>
-                        <mat-icon>person</mat-icon>
+                    <ng-template #showInitials>
+                        <div class="avatar-initials">
+                            {{ helper?.name?.slice(0, 2) | uppercase }}
+                        </div>
                     </ng-template>
                 </div>
+
                 <div class="helper-info">
                     <div class="helper-name"> {{helper.name}} </div>
                     <div class="helper-org"> {{helper.organization}} </div>
                 </div>
                 <div class="helper-status">
-                    <span class="status-badge" [class]="'status-' + helper.type.toLowerCase()">
+                    <!-- <span class="status-badge" [class]="'status-' + helper.type.toLowerCase()">
                         {{helper.type}}
-                    </span>
+                    </span> -->
+                    <label style="align-items: center; color: grey;">0 Households</label>
                 </div>
+            </div>
+            <div *ngIf="loading">
+                Loading...
             </div>
         </div>
     </div>
@@ -234,19 +236,23 @@
         <div *ngIf="selectedHelper && !showAddForm && !isEditing" class="helper-details">
             <div class="details-header">
                 <div class="helper-profile">
-                    <div class="profile-avatar">
-                        <img *ngIf="selectedHelper?.profileImage?.data ; else showIcon"
+                    <div class="helper-avatar">
+                        <img *ngIf="selectedHelper?.profileImage?.data; else showInitials"
                             [src]="'data:' + selectedHelper.profileImage?.mimetype + ';base64,' + selectedHelper.profileImage?.data"
-                            alt="Profile Image" class="profile-img"
-                            (click)="viewDocument(selectedHelper.profileImage)" />
+                            alt="Profile Image" class="profile-img" style="width: 60px; height: 60px; border-radius: 100%; cursor: pointer;"
+                            (click)="viewDocument(selectedHelper.profileImage)"/>
 
-                        <ng-template #showIcon>
-                            <mat-icon>person</mat-icon>
+                        <ng-template #showInitials>
+                            <div class="avatar-initials" 
+                            style="width: 60px; height: 60px; font-size: 25px; background-color: #a8ccf7;"
+                            >
+                                {{ selectedHelper.name.slice(0, 2) | uppercase }}
+                            </div>
                         </ng-template>
                     </div>
+
                     <div class="profile-info">
                         <h2>{{selectedHelper.name}}</h2>
-                        <p class="employee-code">{{selectedHelper.employeeCode}}</p>
                         <span class="service-badge" [class]="'badge-' + selectedHelper.type.toLowerCase()">
                             {{selectedHelper.type}}
                         </span>

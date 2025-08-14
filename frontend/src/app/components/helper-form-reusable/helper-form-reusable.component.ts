@@ -306,7 +306,13 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
   onProfileImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] || null;
+    if(!file) return;
 
+    if(file?.size>5*1024*1024){
+        alert('File size must be less than 5 MB')
+        input.value = '';
+        return;
+    }
     if (file) {
       this.firstFormGroup.get('profileImage')?.setValue(file);
       this.firstFormGroup.get('profileImage')?.markAsTouched();

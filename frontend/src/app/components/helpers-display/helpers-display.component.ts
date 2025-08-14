@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, } from '@angular/core';
+import { Component, inject, OnInit, HostListener, } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { CustomInputComponent } from '../custom/custom-input/custom-input.component';
 import { CustomButtonComponent } from '../custom/custom-button/custom-button.component';
@@ -6,11 +6,14 @@ import { IHelper } from '../../helper.model';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from "@angular/forms";
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { HelperService } from '../../services/heper.service';
+import { HelperService, } from '../../services/heper.service';
 import { IdCardComponent } from '../id-card/id-card.component';
 import { MatDialog } from '@angular/material/dialog';
 import * as XLSX from 'xlsx';
-
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { PaginationOptions } from '../../services/heper.service';
+import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog/delete-confirm-dialog.component';
+import { Observable, exhaustMap, finalize, debounceTime, filter, takeUntil, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-helpers-display',
@@ -22,6 +25,8 @@ import * as XLSX from 'xlsx';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    InfiniteScrollDirective,
+    DeleteConfirmDialogComponent
   ],
   templateUrl: './helpers-display.component.html',
   styleUrl: './helpers-display.component.scss',
@@ -31,23 +36,73 @@ export class HelpersDisplayComponent implements OnInit {
 
   constructor(private fb: FormBuilder, private helperService: HelperService, private dialog: MatDialog) {
     this.helperForm = this.createForm();
-    this.updateOrganizationsCache();
+
   }
 
+  private scrollTrigger$ = new Subject<void>();
+  private destroy$ = new Subject<void>();
+  page = 1;
+  limit = 10;
+  hasMore = true;
+  loading = false;
+  total = 0;
 
   ngOnInit(): void {
+    this.scrollTrigger$.pipe(
+      debounceTime(300),
+      filter(() => !this.loading && this.hasMore),
+      exhaustMap(() => {
+        this.loading = true;
+        const options: PaginationOptions = {
+          searchQuery: this.searchTerm,
+          type: this.selectedServices.length === 1 ? this.selectedServices[0] : '',
+          organizations: this.selectedOrganizations,
+          services: this.selectedServices,
+          sortFeild: this.sortBy,
+          dateFrom: this.filterDateFrom,
+          dateTo: this.filterDateTo
+        }
+        // console.log(options);
+        
+        return this.helperService.getHelpersPagination(this.page, this.limit, options)
+          .pipe(finalize(() => this.loading = false))
+      }),
+      takeUntil(this.destroy$)
+    )
+      .subscribe({
+        next: (res: any) => {
+          // console.log(res);
 
-    this.helperService.getHelpers().subscribe({
-      next: (res) => {
-        this.helpers = res.data;
-        // console.log(this.helpers);
-        this.filteredHelpers = [...this.helpers];
-      },
-      error: (err) => {
-        console.error('Error feching helpers', err);
-      }
-    })
+          const newHelpers = res.data?.helpers || [];
+          this.helpers.push(...newHelpers);
+          this.total = res.data.total;          
+          this.filteredHelpers = [...this.helpers];
+          this.hasMore = res.data?.hasMore;
+          this.page++;
+          this.selectedHelper = this.helpers[0];
+        },
+        error: (err) => console.error('Load error', err)
+      });
+    this.scrollTrigger$.next();
   }
+
+  resetAndFetch() {
+    this.page = 1;
+    this.helpers = [];
+    this.filteredHelpers = [];
+    this.hasMore = true;
+    this.scrollTrigger$.next();
+  }
+
+  onScroll() {
+    this.scrollTrigger$.next();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   helpers: IHelper[] = [];
   filteredHelpers: IHelper[] = [];
   selectedHelper: IHelper | null = null;
@@ -58,8 +113,6 @@ export class HelpersDisplayComponent implements OnInit {
 
   searchTerm = '';
   sortBy = 'name';
-  filterService = '';
-  filterOrganization = '';
   filterDateFrom = '';
   filterDateTo = '';
 
@@ -80,14 +133,17 @@ export class HelpersDisplayComponent implements OnInit {
     { value: 'Cook', label: 'Cook' }
   ];
 
+  organizationOptions = [
+    { value: '', label: 'All Services' },
+    { value: 'ASBL', label: 'ASBL' },
+    { value: 'Springs', label: 'Springs' },
+    { value: 'Springs Helpers', label: 'Springs Helpers' }
+  ];
+
   sortOptions = [
     { value: 'name', label: 'Sort by Name' },
     { value: 'employeeCode', label: 'Sort by Employee Code' },
-    { value: 'joinedOn', label: 'Sort by Joining Date' }
   ];
-
-
-
 
   tempSelectedServices: string[] = [];
   tempSelectedOrganizations: string[] = [];
@@ -101,9 +157,6 @@ export class HelpersDisplayComponent implements OnInit {
     this.tempSelectedServices = [...this.selectedServices];
     this.tempSelectedOrganizations = [...this.selectedOrganizations];
 
-    if (this.showServiceOrgDialog) {
-      this.updateOrganizationsCache();
-    }
   }
 
   onServiceSelectionChange(serviceValue: string, event: Event) {
@@ -185,8 +238,8 @@ export class HelpersDisplayComponent implements OnInit {
   applyServiceOrgFilters() {
     this.selectedServices = [...this.tempSelectedServices];
     this.selectedOrganizations = [...this.tempSelectedOrganizations];
-    this.filterHelpers();
     this.closeAllDialogs();
+    this.resetAndFetch();
   }
 
   resetServiceOrgFilters() {
@@ -196,39 +249,8 @@ export class HelpersDisplayComponent implements OnInit {
     this.organizationSearchTerm = '';
   }
 
-  filterHelpers() {
-    let filtered = [...this.helpers];
-
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(helper =>
-        helper.name.toLowerCase().includes(term) ||
-        helper.employeeCode.toLowerCase().includes(term) ||
-        helper.organization.toLowerCase().includes(term)
-      );
-    }
-
-    if (this.selectedServices.length > 0) {
-      filtered = filtered.filter(helper => this.selectedServices.includes(helper.type));
-    }
-
-    if (this.selectedOrganizations.length > 0) {
-      filtered = filtered.filter(helper => this.selectedOrganizations.includes(helper.organization));
-    }
-
-    if (this.filterDateFrom) {
-      const fromDate = new Date(this.filterDateFrom);
-      filtered = filtered.filter(helper => helper.joinedOn >= fromDate);
-    }
-
-    if (this.filterDateTo) {
-      const toDate = new Date(this.filterDateTo);
-      toDate.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(helper => helper.joinedOn <= toDate);
-    }
-
-    this.filteredHelpers = filtered;
-    this.sortHelpers();
+  onSearchChange() {
+    this.resetAndFetch();
   }
 
   getActiveFilterCount(): number {
@@ -248,7 +270,7 @@ export class HelpersDisplayComponent implements OnInit {
     this.filterDateFrom = '';
     this.filterDateTo = '';
     this.sortBy = 'name';
-    this.filterHelpers();
+    this.resetAndFetch();
     this.closeAllDialogs();
   }
 
@@ -280,8 +302,8 @@ export class HelpersDisplayComponent implements OnInit {
 
   applySorting(sortValue: string) {
     this.sortBy = sortValue;
-    this.sortHelpers();
     this.closeAllDialogs();
+    this.resetAndFetch();
   }
 
   get filteredServiceOptions() {
@@ -292,24 +314,12 @@ export class HelpersDisplayComponent implements OnInit {
   }
 
   uniqueOrganizations: any[] = [];
-  organizationsCache: any[] = [];
-
-  updateOrganizationsCache() {
-    const organizations = [...new Set(this.helpers.map(h => h.organization))];
-    this.organizationsCache = [
-      { value: '', label: 'All Organizations' },
-      ...organizations.map(org => ({ value: org, label: org }))
-    ];
-    this.updateFilteredOrganizations();
-  }
 
   updateFilteredOrganizations() {
     if (!this.organizationSearchTerm) {
-      this.uniqueOrganizations = this.organizationsCache;
+      this.uniqueOrganizations = this.organizationOptions;
     } else {
-      this.uniqueOrganizations = this.organizationsCache.filter(option =>
-        option.label.toLowerCase().includes(this.organizationSearchTerm.toLowerCase())
-      );
+      this.resetAndFetch();
     }
   }
 
@@ -318,34 +328,15 @@ export class HelpersDisplayComponent implements OnInit {
   }
 
   applyDateFilter() {
-    this.filterHelpers();
     this.closeAllDialogs();
+    this.resetAndFetch();
   }
 
   resetDateFilter() {
     this.filterDateFrom = '';
     this.filterDateTo = '';
-    this.filterHelpers();
+    this.resetAndFetch();
     this.closeAllDialogs();
-  }
-
-  sortHelpers() {
-    this.filteredHelpers.sort((a, b) => {
-      let aValue: any = a[this.sortBy as keyof IHelper];
-      let bValue: any = b[this.sortBy as keyof IHelper];
-
-      if (aValue instanceof Date && bValue instanceof Date) {
-        return aValue.getTime() - bValue.getTime();
-      }
-
-      if (aValue === undefined && bValue === undefined) return 0;
-      if (aValue === undefined) return 1;
-      if (bValue === undefined) return -1;
-      if (Array.isArray(aValue)) aValue = aValue.join(', ');
-      if (Array.isArray(bValue)) bValue = bValue.join(', ');
-
-      return String(aValue).localeCompare(String(bValue));
-    });
   }
 
   createForm(): FormGroup {
@@ -437,20 +428,24 @@ export class HelpersDisplayComponent implements OnInit {
   deleteHelper() {
     if (!this.selectedHelper) return;
 
-    if (confirm(`Are you sure you want to delete ${this.selectedHelper.name}?`)) {
-      this.helperService.deleteHelper(this.selectedHelper.employeeCode).subscribe({
-        next: (res) => {
-          // console.log(res);
-          console.log('Selected helper before delete:', this.selectedHelper);
-          this.filteredHelpers = this.helpers.filter(h => h.employeeCode !== this.selectedHelper!.employeeCode);
-          this.selectedHelper = null;
-        }
-        ,
-        error: (err) => {
-          console.error(`Error while deleting helper: `, err);
-        }
-      })
-    }
+    const dialogRef = this.dialog.open(DeleteConfirmDialogComponent, {
+      width: '600px',
+      data: {name: this.selectedHelper.name, type: this.selectedHelper.type}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result){
+        this.helperService.deleteHelper(this.selectedHelper!.employeeCode).subscribe({
+          next: ()=>{
+            this.resetAndFetch();
+          },
+          error: (err)=>{
+            console.error('Error while deleting: ', err);
+          }
+        })
+      }
+    });
+    
   }
 
 

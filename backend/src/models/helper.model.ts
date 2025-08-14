@@ -5,7 +5,7 @@ export interface IHelper extends Document {
     employeeCode: string;
     name: string;
     type: 'Nurse' | 'Driver' | 'Newspaper' | 'Laundry' | 'Maid' | 'Plumber' | 'Cook';
-    organization: string;
+    organization: 'ASBL' | 'Springs' | 'Springs Helpers';
     gender: 'Male' | 'Female' | 'Other';
     language: string[];
     mobileNo: string;
@@ -71,7 +71,7 @@ const HelperSchema: Schema = new Schema({
     mobileNo: {
         type: String,
         required: true,
-        match: /^[6-9]\d{9}$/
+        // match: /^[6-9]\d{9}$/
     },
     emailId: {
         type: String,
@@ -100,15 +100,15 @@ const HelperSchema: Schema = new Schema({
     kycDocument: {
         data: {
             type: Buffer,
-            required: true
+            // required: true
         },
         filename: {
             type: String,
-            required: true
+            // required: true
         },
         mimetype: {
             type: String,
-            required: true
+            // required: true
         }
     },
 

@@ -18,7 +18,9 @@ export const helperValidation = [
         .withMessage('Invalid helper type'),
     body('organization')
         .notEmpty()
-        .withMessage('Organization is required'),
+        .withMessage('Organization is required')
+        .isIn(['ASBL', 'Springs', 'Springs Helpers'])
+        .withMessage('Invalid Organization type'),
     body('gender')
         .notEmpty()
         .withMessage('Gender is required')

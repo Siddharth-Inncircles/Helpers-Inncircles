@@ -1,0 +1,23 @@
+
+<div class="dialog-header">
+    <mat-icon style="margin: 10px; cursor: pointer;" (click)="onCancel()">close</mat-icon>
+</div>
+
+<mat-dialog-content>
+<mat-icon class="big-icon">warning</mat-icon>
+  <p style="font-size: 20px;">
+    Are you sure you want to delete <strong style="color: red; font-weight: bold;">{{ data.name }} ({{data.type}})</strong>?
+  </p>
+  <p style="color: grey;">
+    You can't undo this action
+  </p>
+</mat-dialog-content>
+
+<div style="border: 0.5px solid rgb(235, 235, 235);"></div>
+
+<mat-dialog-actions align="end">
+  <!-- <button mat-button (click)="onCancel()">Cancel</button> -->
+    <app-custom-button label="Cancel" type="secondary" (click)="onCancel()"/>
+   <app-custom-button label="Delete" icon="delete_outline" type="danger" (click)="onDelete()"/>
+  <!-- <button mat-raised-button color="warn" (click)="onDelete()">Delete</button> -->
+</mat-dialog-actions>

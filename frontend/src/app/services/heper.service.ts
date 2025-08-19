@@ -5,7 +5,7 @@ import { Observable } from "rxjs";
 import { environment } from "../../environments/environment";
 
 export interface PaginationOptions {
-    sortFeild?: string,
+    sortField?: string,
     searchQuery?: string,
     type?: string,
     organizations?: string[],
@@ -26,15 +26,11 @@ export class HelperService {
 
     getHelpersPagination(page: number, limit: number, options: PaginationOptions = {}
     ): Observable<{ success: boolean, data: IHelper[] }> {
-        let params: any = { page, limit, ...options };
-        if (options.organizations?.length) {
-            params.organizations = options.organizations.join(',');
-        }
-        if (options.services?.length) {
-            params.services = options.services.join(',');
-        }
-        let httpParams = new HttpParams({fromObject: params});
-        return this.http.get<{ success: boolean, data: IHelper[] }>(`${this.apiUrl}/pagination`, {params: httpParams});
+        const payload = {
+            pagination: { page, limit },
+            filters: options
+        };
+        return this.http.post<{ success: boolean, data: IHelper[] }>(`${this.apiUrl}/pagination`, payload);
     }
 
     addHelper(formData: FormData): Observable<{ success: boolean, data: IHelper }> {

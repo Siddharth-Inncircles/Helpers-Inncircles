@@ -26,7 +26,6 @@ import { Observable, exhaustMap, finalize, debounceTime, filter, takeUntil, Subj
     ReactiveFormsModule,
     FormsModule,
     InfiniteScrollDirective,
-    DeleteConfirmDialogComponent
   ],
   templateUrl: './helpers-display.component.html',
   styleUrl: './helpers-display.component.scss',
@@ -58,7 +57,7 @@ export class HelpersDisplayComponent implements OnInit {
           type: this.selectedServices.length === 1 ? this.selectedServices[0] : '',
           organizations: this.selectedOrganizations,
           services: this.selectedServices,
-          sortFeild: this.sortBy,
+          sortField: this.sortBy,
           dateFrom: this.filterDateFrom,
           dateTo: this.filterDateTo
         }
@@ -150,13 +149,12 @@ export class HelpersDisplayComponent implements OnInit {
   selectedServices: string[] = [];
   selectedOrganizations: string[] = [];
 
-  toggleServiceOrgDialog() {
+  toggleServiceOrgDialog(event: Event) {
     this.showServiceOrgDialog = !this.showServiceOrgDialog;
     this.closeOtherDialogs('serviceOrg');
 
     this.tempSelectedServices = [...this.selectedServices];
     this.tempSelectedOrganizations = [...this.selectedOrganizations];
-
   }
 
   onServiceSelectionChange(serviceValue: string, event: Event) {
@@ -211,7 +209,7 @@ export class HelpersDisplayComponent implements OnInit {
   toggleAllOrganizations(event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
     if (isChecked) {
-      this.tempSelectedOrganizations = this.uniqueOrganizations
+      this.tempSelectedOrganizations = this.filteredOrganizationsOptions
         .filter(option => option.value !== '')
         .map(option => option.value);
     } else {
@@ -220,13 +218,13 @@ export class HelpersDisplayComponent implements OnInit {
   }
 
   isAllOrganizationsSelected(): boolean {
-    const availableOrgs = this.uniqueOrganizations.filter(option => option.value !== '');
+    const availableOrgs = this.filteredOrganizationsOptions.filter(option => option.value !== '');
     return availableOrgs.length > 0 &&
       availableOrgs.every(option => this.tempSelectedOrganizations.includes(option.value));
   }
 
   isSomeOrganizationsSelected(): boolean {
-    const availableOrgs = this.uniqueOrganizations.filter(option => option.value !== '');
+    const availableOrgs = this.filteredOrganizationsOptions.filter(option => option.value !== '');
     const selectedCount = availableOrgs.filter(option => this.tempSelectedOrganizations.includes(option.value)).length;
     return selectedCount > 0 && selectedCount < availableOrgs.length;
   }
@@ -276,28 +274,36 @@ export class HelpersDisplayComponent implements OnInit {
 
 
 
-  toggleSortDialog() {
+  toggleSortDialog(event: Event) {
     this.showSortDialog = !this.showSortDialog;
     this.closeOtherDialogs('sort');
+    console.log('sort');
   }
 
 
 
-  toggleDateDialog() {
+  toggleDateDialog(event: Event) {
     this.showDateDialog = !this.showDateDialog;
     this.closeOtherDialogs('date');
   }
 
   closeOtherDialogs(except: string) {
     if (except !== 'sort') { this.showSortDialog = false; }
-    if (except !== 'serviceOrg') this.showServiceOrgDialog = false;
+    if (except !== 'serviceOrg') {
+      this.showServiceOrgDialog = false;
+    }
     if (except !== 'date') this.showDateDialog = false;
   }
 
+  
+  @HostListener('document:click')
   closeAllDialogs() {
+    
     this.showSortDialog = false;
     this.showServiceOrgDialog = false;
     this.showDateDialog = false;
+    this.serviceSearchTerm ='';
+      this.organizationSearchTerm='';
   }
 
   applySorting(sortValue: string) {
@@ -313,18 +319,11 @@ export class HelpersDisplayComponent implements OnInit {
     );
   }
 
-  uniqueOrganizations: any[] = [];
-
-  updateFilteredOrganizations() {
-    if (!this.organizationSearchTerm) {
-      this.uniqueOrganizations = this.organizationOptions;
-    } else {
-      this.resetAndFetch();
-    }
-  }
-
-  onOrganizationSearch() {
-    this.updateFilteredOrganizations();
+  get filteredOrganizationsOptions() {
+    if (!this.organizationSearchTerm) return this.organizationOptions;
+    return this.organizationOptions.filter(option =>
+      option.label.toLowerCase().includes(this.organizationSearchTerm.toLowerCase())
+    );
   }
 
   applyDateFilter() {

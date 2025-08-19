@@ -28,11 +28,12 @@ export class CustomInputComponent implements ControlValueAccessor {
   @Input() icon: string = '';
   @Input() type:string = 'text';
   @Input() name:string = '';
+  
   // @Input() control!: FormControl;
 
   @Input() value: any = '';
   private onChange = (value:any)=>{};
-  private onTouched = ()=>{};
+  onTouched = ()=>{};
 
 
   writeValue(value: any): void {

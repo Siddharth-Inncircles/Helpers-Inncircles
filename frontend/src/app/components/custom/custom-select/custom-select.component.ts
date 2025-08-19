@@ -32,7 +32,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
 
   value : any = '';
   onChange = (value:any)=>{};
-  onTouch = ()=>{};
+  onTouch: () => void = () => {};
 
   writeValue(value: any): void {
     this.value = value;

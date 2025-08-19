@@ -26,6 +26,7 @@ export class HelperEditComponent implements OnInit, OnDestroy {
   loading = true;
   private routeSubscription?: Subscription;
   private isFormInitialized = false;
+  private originalHelperData: HelperFormData | null = null;
 
   constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router) { }
 
@@ -82,6 +83,7 @@ export class HelperEditComponent implements OnInit, OnDestroy {
           };
           
           // console.log('Processed helper data:', this.helperData);
+          this.originalHelperData = { ...this.helperData };
           this.loading = false;
           
           setTimeout(() => {
@@ -113,55 +115,56 @@ export class HelperEditComponent implements OnInit, OnDestroy {
 
   
 private updateHelper(formData: HelperFormData) {
-  // console.log("This is the updated helper data: ", formData);
-  
+  if (!this.originalHelperData) {
+    console.error('No original data to compare');
+    return;
+  }
+
   const processedFormData = new FormData();
+  let hasChanges = false;
 
-  processedFormData.append('type', formData.type || '');
-  processedFormData.append('organization', formData.organization || '');
-  processedFormData.append('name', formData.name || '');
-  processedFormData.append('gender', formData.gender || '');
-  processedFormData.append('mobileNo', formData.mobileNo || '');
-  processedFormData.append('emailId', formData.email || '');
-  processedFormData.append('vechileType', formData.vehicleType === '' ? 'None' : (formData.vehicleType || ''));
-  processedFormData.append('vechileNumber', formData.vehicleNumber || '');
-  processedFormData.append('identificationCard', formData.identificationCard || '');
-
-  if (formData.language && Array.isArray(formData.language)) {
-    formData.language.forEach((lang: string, index: number) => {
-      processedFormData.append(`language[${index}]`, lang);
-    });
+  if (formData.type !== this.originalHelperData.type) {
+    processedFormData.append('type', formData.type || '');
+    hasChanges = true;
   }
 
-  if (formData.profileImage instanceof File) {
-    // console.log('Uploading new profile image file');
-    processedFormData.append('profileImage', formData.profileImage);
-  } else if (typeof formData.profileImage === 'string') {
-    // console.log('Keeping existing profile image:', formData.profileImage);
-    processedFormData.append('profileImageUrl', formData.profileImage);
+  if (formData.organization!= this.originalHelperData.organization) {
+    processedFormData.append('organization', formData.organization ?? '');
+    hasChanges = true;
   }
 
+  if (formData.name !== this.originalHelperData.name) {
+    processedFormData.append('name', formData.name ?? '');
+    hasChanges = true;
+  }
+
+  if (formData.gender !== this.originalHelperData.gender) {
+    processedFormData.append('gender', formData.gender || '');
+    hasChanges = true;
+  }
+
+  if (formData.mobileNo !== this.originalHelperData.mobileNo) {
+    processedFormData.append('mobileNo', formData.mobileNo || '');
+    hasChanges = true;
+  }
+
+  if (formData.email != this.originalHelperData.email) {
+    processedFormData.append('emailId', formData.email || '');
+    hasChanges = true;
+  }
+
+  if (formData.identificationCard !== this.originalHelperData.identificationCard) {
+    processedFormData.append('identificationCard', formData.identificationCard || '');
+    hasChanges = true;
+  }
+  if (formData.vehicleType !== this.originalHelperData.vehicleType) {
+    processedFormData.append('vechileType', formData.vehicleType === '' ? 'None' : (formData.vehicleType || ''));
+    hasChanges = true;
+  }
   
-
-  if (formData.kycDocument instanceof File) {
-    // console.log('Uploading new KYC document file');
-    processedFormData.append('kycDocument', formData.kycDocument);
-  } else if (typeof formData.kycDocument === 'string') {
-    // console.log('Keeping existing KYC document:', formData.kycDocument);
-    processedFormData.append('kycDocumentUrl', formData.kycDocument);
-  }
-
-  if (formData.additionalPdfs instanceof File) {
-    // console.log('Uploading new additional PDF file');
-    processedFormData.append('additionalPdfs', formData.additionalPdfs);
-  } else if (typeof formData.additionalPdfs === 'string') {
-    console.log('Keeping existing additional PDF:', formData.additionalPdfs);
-    processedFormData.append('additionalPdfsUrl', formData.additionalPdfs);
-  }
-
-  // console.log('FormData contents:');
-  for (let [key, value] of (processedFormData as any).entries()) {
-    console.log(key, ':', value instanceof File ? `File: ${value.name}` : value);
+  if (formData.vehicleNumber !== this.originalHelperData.vehicleNumber && formData.vehicleType !== 'None' && formData.vehicleType !== '') {
+    processedFormData.append('vechileNumber', formData.vehicleNumber || '');
+    hasChanges = true;
   }
   
   this.http.put<IHelper>(`${environment.apiUrl}/helper/${this.helperId}`, processedFormData)

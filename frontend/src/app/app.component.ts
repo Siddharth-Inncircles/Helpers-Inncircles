@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
+import { Component, Host, HostListener, OnInit } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 
 @Component({
@@ -14,5 +14,4 @@ import { RouterOutlet } from "@angular/router";
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent{
-  
 }

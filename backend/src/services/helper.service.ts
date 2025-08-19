@@ -1,6 +1,15 @@
-import { fileURLToPath } from "url";
 import HelperModel, { IHelper } from "../models/helper.model";
 import { DeleteResult, FilterQuery } from "mongoose";
+
+interface HelperPaginationOptions {
+    searchQuery?: string;
+    type?: string;
+    organizations?: string[] | string;
+    dateFrom?: string;
+    dateTo?: string;
+    services?: string[];
+}
+
 
 export class HelperService {
     async CreateHelper(helperData: Partial<IHelper>): Promise<IHelper> {
@@ -9,79 +18,67 @@ export class HelperService {
     }
 
 
-    async getAllHelperPagination(page: string, limit: string, sortFeild: string, searchQuery?: string, type?: string, organizations?: string[],
-        dateFrom?: string, dateTo?: string, services?: string[]
+    async getAllHelperPagination(
+        page: string,
+        limit: string,
+        sortField: string,
+        options: HelperPaginationOptions = {}
     ) {
         try {
-            const pageNo: number = parseInt(page as string) || 1;
-            const limitNo: number = parseInt(limit as string) || 10;
-            let filter: FilterQuery<IHelper> = {};
-            // console.log(searchQuery);
+            const pageNo = parseInt(page) || 1;
+            const limitNo = parseInt(limit) || 10;
+            const skip = (pageNo - 1) * limitNo;
+            console.log(sortField);
             
-            const skip: number = (pageNo - 1) * limitNo;
+            let filter: FilterQuery<IHelper> = {};
 
-            if (searchQuery?.trim()) {
+            if (options.searchQuery?.trim()) {
                 filter.$or = [
-                    { name: { $regex: searchQuery, $options: 'i' } },
-                    { employeeCode: { $regex: searchQuery, $options: 'i' } },
-                    { organization: { $regex: searchQuery, $options: 'i' } }
-                ]
+                    { name: { $regex: options.searchQuery, $options: 'i' } },
+                    { employeeCode: { $regex: options.searchQuery, $options: 'i' } },
+                    { organization: { $regex: options.searchQuery, $options: 'i' } }
+                ];
             }
 
-            if (organizations) {
-                const orgArray = Array.isArray(organizations)
-                    ? organizations
-                    : (organizations as string).split(',').map(o => o.trim());
-
-                filter.organization = { $in: orgArray };
+            if (options.organizations?.length) {
+                filter.organization = { $in: options.organizations };
             }
 
-            if (services) {
-                const serviceArray = Array.isArray(services)
-                    ? services
-                    : (services as string).split(',').map(s => s.trim());                
-                filter.type = { $in: serviceArray };
+            if (options.services?.length) {
+                filter.type = { $in: options.services };
             }
 
-            if (dateFrom || dateTo) {
+            if (options.dateFrom || options.dateTo) {
                 filter.joinedOn = {};
-                if (dateFrom) filter.joinedOn.$gte = new Date(dateFrom);
-                if (dateTo) filter.joinedOn.$lte = new Date(dateTo);
+                if (options.dateFrom) filter.joinedOn.$gte = new Date(options.dateFrom);
+                if (options.dateTo) filter.joinedOn.$lte = new Date(options.dateTo);
             }
 
-            if (type) {
-                filter.type = type;
+            if (options.type) {
+                filter.type = options.type;
             }
 
             const sort: Record<string, 1 | -1> = {};
-            sort[sortFeild || 'employeeCode'] = 1;
+            sort[sortField || 'employeeCode'] = 1;
 
             const total = await HelperModel.countDocuments(filter);
-
             const helpers = await HelperModel.aggregate([
                 { $match: filter },
                 { $sort: sort },
-                {
-                    $project: {
-                        _id: 1, employeeCode: 1, name: 1, type: 1, organization: 1, gender: 1,
-                        language: 1, mobileNo: 1, emailId: 1, joinedOn: 1, households: 1, kycDocument: 1, identificationCard: 1,
-                        additionalPdfs: 1, profileImage: 1, createdAt: 1, updatedAt: 1
-                    }
-                },
                 { $skip: skip },
                 { $limit: limitNo },
-
             ]);
 
             return {
                 helpers,
                 total,
                 hasMore: skip + helpers.length < total,
-            }
+            };
         } catch (error) {
             console.error("Pagination error: ", error);
         }
     }
+
 
     async getAllHelper(searchQuery?: string, type?: string): Promise<IHelper[]> {
         let filter: FilterQuery<IHelper> = {};
@@ -95,30 +92,9 @@ export class HelperService {
         if (type) {
             filter.type = type;
         }
-        return HelperModel.aggregate(
+        return await HelperModel.aggregate(
             [
                 { $match: filter },
-                {
-                    $project: {
-                        _id: 1,
-                        employeeCode: 1,
-                        name: 1,
-                        type: 1,
-                        organization: 1,
-                        gender: 1,
-                        language: 1,
-                        mobileNo: 1,
-                        emailId: 1,
-                        joinedOn: 1,
-                        households: 1,
-                        kycDocument: 1,
-                        identificationCard: 1,
-                        additionalPdfs: 1,
-                        profileImage: 1,
-                        createdAt: 1,
-                        updatedAt: 1
-                    }
-                },
                 { $sort: { createdAt: -1 } }
             ]
         )
@@ -174,17 +150,17 @@ export class HelperService {
     }
 
     async GetLastEmployeeCode(): Promise<string> {
-    let code: string = '12345';
-    let exists = true;
+        let code: string = '12345';
+        let exists = true;
 
-    while (exists) {
-        code = Math.floor(10000 + Math.random() * 90000).toString();
-        const duplicate = await HelperModel.findOne({ employeeCode: code }).lean();
-        if (!duplicate) {
-            exists = false; 
+        while (exists) {
+            code = Math.floor(10000 + Math.random() * 90000).toString();
+            const duplicate = await HelperModel.findOne({ employeeCode: code }).lean();
+            if (!duplicate) {
+                exists = false;
+            }
         }
+        return code;
     }
-    return code;
-}
 
 }

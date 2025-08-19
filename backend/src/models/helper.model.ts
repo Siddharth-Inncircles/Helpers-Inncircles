@@ -1,18 +1,50 @@
 import { timeStamp } from "console";
 import mongoose, { Document, Schema } from "mongoose";
 
+export enum HelperType {
+    NURSE = 'Nurse',
+    DRIVER = 'Driver',
+    NEWSPAPER = 'Newspaper',
+    LAUNDRY = 'Laundry',
+    MAID = 'Maid',
+    PLUMBER = 'Plumber',
+    COOK = 'Cook'
+}
+
+export enum OrganizationType {
+    ASBL = 'ASBL',
+    SPRINGS = 'Springs',
+    SPRINGS_HELPERS = 'Springs Helpers'
+}
+
+export enum VehicleType {
+    BIKE = 'Bike',
+    CAR = 'Car',
+    CYCLE = 'Cycle',
+    BUS = 'Bus',
+    OTHER = 'Other',
+    NONE = 'None'
+}
+
+export enum Gender {
+    MALE = 'Male',
+    FEMALE = 'Female',
+    OTHER = 'Other'
+}
+
+
 export interface IHelper extends Document {
     employeeCode: string;
     name: string;
-    type: 'Nurse' | 'Driver' | 'Newspaper' | 'Laundry' | 'Maid' | 'Plumber' | 'Cook';
-    organization: 'ASBL' | 'Springs' | 'Springs Helpers';
-    gender: 'Male' | 'Female' | 'Other';
+    type: HelperType;
+    organization: OrganizationType;
+    gender: Gender;
     language: string[];
     mobileNo: string;
     emailId?: string;
     joinedOn: Date;
     households: number;
-    vechileType: 'Bike' | 'Car' | 'Cycle' | 'Bus' | 'Other' | 'None';
+    vechileType: VehicleType;
     vechileNumber?: string;
     kycDocument?: {
         data: Buffer,
@@ -52,17 +84,18 @@ const HelperSchema: Schema = new Schema({
     type: {
         type: String,
         required: true,
-        enum: ['Nurse', 'Driver', 'Newspaper', 'Laundry', 'Maid', 'Plumber', 'Cook']
+        enum: Object.values(HelperType),
     },
     organization: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        enum: Object.values(OrganizationType),
     },
     gender: {
         type: String,
         required: true,
-        enum: ['Male', 'Female', 'Other']
+        enum: Object.values(Gender),
     },
     language: [{
         type: String,
@@ -90,7 +123,7 @@ const HelperSchema: Schema = new Schema({
     },
     vechileType: {
         type: String,
-        enum: ['Bike', 'Car', 'Cycle', 'Bus', 'Other', 'None']
+        enum: Object.values(VehicleType),
     },
     vechileNumber: {
         type: String,

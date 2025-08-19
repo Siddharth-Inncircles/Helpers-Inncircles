@@ -72,31 +72,59 @@ export class HelperController {
         }
     };
 
-    getHelpersByPagination = async(req: Request, res: Response): Promise<void> => {
+    getHelpersByPagination = async (req: Request, res: Response): Promise<void> => {
         try {
-            // console.log(req.query);
+            const { pagination, filters } = req.body;
+            console.log(req.body);
             
-            const {page, limit, sortFeild ,searchQuery, type, organizations, dateFrom, dateTo, services} = {...req.query};
-            // console.log(services);
-            
+            const page = pagination?.page?.toString() || '1';
+            const limit = pagination?.limit?.toString() || '10';
+
+            const sortField = filters?.sortField || 'employeeCode';
+
+            const getStringArray = (value: any): string[] | undefined => {
+                if (!value) return undefined;
+
+                if (Array.isArray(value)) {
+                    return value.filter(item => typeof item === 'string') as string[];
+                }
+
+                if (typeof value === 'string') {
+                    return value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                }
+
+                return undefined;
+            };
+
+            const options = {
+                searchQuery: typeof filters?.searchQuery === 'string' ? filters.searchQuery : undefined,
+                type: typeof filters?.type === 'string' ? filters.type : undefined,
+                organizations: getStringArray(filters?.organizations),
+                services: getStringArray(filters?.services),
+                dateFrom: typeof filters?.dateFrom === 'string' ? filters.dateFrom : undefined,
+                dateTo: typeof filters?.dateTo === 'string' ? filters.dateTo : undefined
+            };
+
             const helpers = await this.helperService.getAllHelperPagination(
-                page as string, limit as string, sortFeild as string, searchQuery as string, type as string,
-                organizations as string[], dateFrom as string, dateTo as string, services as string[], 
-            )
+                page,
+                limit,
+                sortField,
+                options
+            );
+
             res.status(200).json({
                 data: helpers,
-                message: 'Helpers retreived successfully',
+                message: "Helpers retrieved successfully",
                 success: true,
-            })
+            });
         } catch (error) {
             res.status(500).json({
                 success: false,
-                message: 'Error while retreiving helpers',
-                error: error,
-                
-            })
+                message: "Error retrieving helpers",
+                error: (error as Error).message,
+            });
         }
-    }
+    };
 
     getAllHelpers = async (req: Request, res: Response): Promise<void> => {
         try {

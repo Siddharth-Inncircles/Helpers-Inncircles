@@ -26,7 +26,7 @@ export class IdCardComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { helper: any },
     private qrCodeService: QrCodeService
   ) {
-    console.log(data);
+    // console.log(JSON.stringify(data));
     
     this.helperData = data?.helper;
     this.securityCode = this.generateSecurityCode();
@@ -40,13 +40,20 @@ export class IdCardComponent implements OnInit {
   }
 
   private async generateQRCode() {
-    try {
-      const qrData = this.qrCodeService.generateHelperQRData(this.helperData);
-      this.qrCodeUrl = await this.qrCodeService.generateQRCode(qrData, { width: 80 });
-    } catch (error) {
-      console.error('Error generating QR code:', error);
+  try {
+    let qrData = this.qrCodeService.generateHelperQRData(this.helperData);
+    if (typeof qrData !== 'string') {
+      qrData = JSON.stringify(qrData);
     }
+
+    console.log("Final QR String:", qrData);
+
+    this.qrCodeUrl = await this.qrCodeService.generateQRCode(qrData, { width: 80 });
+  } catch (error) {
+    console.error('Error generating QR code:', error);
   }
+}
+
 
   private loadProfileImage() {
     if (this.helperData.profileImage && this.helperData.profileImage.data) {

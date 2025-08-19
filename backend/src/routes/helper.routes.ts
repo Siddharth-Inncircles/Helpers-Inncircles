@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { HelperController } from "../controllers/helper.controller";
 import multer from 'multer';
+import { ValidatePagination, validateRequest, helperValidation } from "../middleware/helper.middleware";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -11,15 +12,20 @@ helperRouter.post('/', upload.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'kycDocument', maxCount: 1 },
     { name: 'additionalPdfs' }
-]), helperController.createHelper);
-helperRouter.get('/pagination', helperController.getHelpersByPagination);
+]), helperValidation, validateRequest, helperController.createHelper);
+
+helperRouter.post('/pagination', ValidatePagination, validateRequest, helperController.getHelpersByPagination);
+
 helperRouter.get('/', helperController.getAllHelpers);
+
 helperRouter.get('/:id', helperController.getHelperByID);
+
 helperRouter.put('/:id',upload.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'kycDocument', maxCount: 1 },
     { name: 'additionalPdfs' }
 ]), helperController.updateHelper);
+
 helperRouter.delete('/:id', helperController.deleteHelper);
 
 export default helperRouter;

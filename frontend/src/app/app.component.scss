@@ -1,51 +1,16 @@
-// .container {
+// .headerSection {
 //   display: flex;
-//   height: 100vh;
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   width: 100%;
+//   height: 60px; 
+//   z-index: 1000;
+//   align-items: center;
+//   padding: 0 15px;
+//   background-color: #fff;
 // }
 
-// .sidebar {
-//   width: 300px;
-//   background: #f7f7f7;
-//   padding: 1rem;
-//   border-right: 1px solid #ddd;
-//   overflow-y: auto;
-
-//   .full-width {
-//     width: 100%;
-//     margin-bottom: 1rem;
-//   }
-
-//   mat-list-item {
-//     cursor: pointer;
-//     &.selected {
-//       background: #e3f2fd;
-//     }
-//     .sub {
-//       font-size: 12px;
-//       color: gray;
-//     }
-//   }
+// .helper-management-container {
+//   padding-top: 60px;
 // }
-
-// .details {
-//   flex: 1;
-//   padding: 1.5rem;
-//   overflow-y: auto;
-
-//   &.placeholder {
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
-//     font-size: 18px;
-//     color: gray;
-//   }
-// }
-
-
-
-
-
-
-
-
-

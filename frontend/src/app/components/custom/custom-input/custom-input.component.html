@@ -10,7 +10,7 @@
   <mat-icon matPrefix *ngIf="icon">{{ icon }}</mat-icon>
   <mat-label *ngIf="name">{{name}}</mat-label>
   <input matInput [type]="type" [placeholder]="placeholder" class="custom-input"
-  [value]="value" (input)="onInputChange($event)"/>
+  [value]="value" (input)="onInputChange($event)" (blur)="onTouched()"/>
 </mat-form-field>
 
 

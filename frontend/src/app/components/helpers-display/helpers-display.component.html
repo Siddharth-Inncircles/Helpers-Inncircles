@@ -1,7 +1,10 @@
+<div class="headerSection">
+        <h1 class="page-title">Helpers</h1>
+     </div>
 <div class="controls-section">
-    <div class="filter-controls">
+    <div class="filter-controls" (click)="$event.stopPropagation()">
         <div class="filter-icon-container">
-            <button class="filter-icon-btn" [class.active]="showSortDialog" (click)="toggleSortDialog()"
+            <button class="filter-icon-btn" [class.active]="showSortDialog" (click)="toggleSortDialog($event)"
                 title="Sort Options">
                 <span class="material-symbols-outlined">
                     swap_vert
@@ -9,7 +12,7 @@
                 <!-- <span class="filter-label">Sort</span> -->
             </button>
 
-            <div class="filter-dialog" *ngIf="showSortDialog" (clickOutside)="closeAllDialogs()">
+            <div class="filter-dialog" *ngIf="showSortDialog"  >
                 <div class="dialog-header">
                     <h4>Sort By</h4>
                     <button class="close-btn" (click)="closeAllDialogs()">
@@ -29,8 +32,8 @@
             </div>
         </div>
 
-        <div class="filter-icon-container">
-            <button class="filter-icon-btn" [class.active]="showServiceOrgDialog" (click)="toggleServiceOrgDialog()"
+        <div class="filter-icon-container" (click)="$event.stopPropagation()">
+            <button class="filter-icon-btn" [class.active]="showServiceOrgDialog" (click)="toggleServiceOrgDialog($event)"
                 title="Service & Organization Filter">
                 <span class="material-symbols-outlined">
                     filter_alt
@@ -81,7 +84,7 @@
                         <div class="search-input">
                             <mat-icon>search</mat-icon>
                             <input type="text" placeholder="Search organizations..."
-                                [(ngModel)]="organizationSearchTerm" (input)="onOrganizationSearch()">
+                                [(ngModel)]="organizationSearchTerm">
                         </div>
                         <div class="multiselect-container">
                             <div class="multiselect-option select-all">
@@ -90,7 +93,7 @@
                                     (change)="toggleAllOrganizations($event)">
                                 <label for="selectAllOrgs">Select All Organizations</label>
                             </div>
-                            <div class="multiselect-option" *ngFor="let option of organizationOptions"
+                            <div class="multiselect-option" *ngFor="let option of filteredOrganizationsOptions"
                                 [style.display]="option.value === '' ? 'none' : 'flex'">
                                 <input type="checkbox" [id]="'org-' + option.value" [value]="option.value"
                                     [checked]="tempSelectedOrganizations.includes(option.value)"
@@ -113,9 +116,9 @@
             </div>
         </div>
 
-        <div class="filter-icon-container">
+        <div class="filter-icon-container" (click)="$event.stopPropagation()">
             <button class="filter-icon-btn" [class.active]="showDateDialog || filterDateFrom || filterDateTo"
-                (click)="toggleDateDialog()" title="Date Range Filter">
+                (click)="toggleDateDialog($event)" title="Date Range Filter">
                 <mat-icon>date_range</mat-icon>
                 <span class="filter-count" *ngIf="(filterDateFrom || filterDateTo)">1</span>
             </button>

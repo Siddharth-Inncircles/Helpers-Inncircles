@@ -1,6 +1,6 @@
 <div class="custom-stepper-container">
     <!-- Steps List - Show only if steps are enabled -->
-    <div class="steps-list" *ngIf="enableSteps && mode==='create'" style="position: sticky; top: 2px;">
+    <div class="steps-list" *ngIf="enableSteps && mode==='create'" style="position: sticky; top: 65px; height: 80vh;">
         <div class="step-item" *ngFor="let step of steps; let i = index" [class.active]="i === currentStep"
             [class.completed]="i < currentStep" (click)="enableSteps ? goToStep(i) : null">
 
@@ -15,7 +15,7 @@
     </div>
 
 
-    <div class="steps-list-edit" *ngIf="enableSteps && mode==='edit'" style="position: sticky; top: 2px;">
+    <div class="steps-list-edit" *ngIf="enableSteps && mode==='edit'" style="position: sticky; top: 65px; height: 80vh;">
         <div class="step-item-edit" *ngFor="let step of edit_steps; let i = index" [class.active]="i === currentStep"
             [class.completed]="i < currentStep" [class.clickable]="enableSteps"
             (click)="enableSteps ? goToStep(i) : null">
@@ -58,7 +58,7 @@
             {value:'Maid', label:'Maid'},
             {value:'Plumber', label:'Plumber'},
             {value:'Cook', label:'Cook'},
-          ]" placeholder="Select type of Work" />
+          ]" placeholder="Select type of Work" (blur)="onFeildBlur('type')"/>
                 <div class="error" *ngIf="firstFormGroup.get('type')?.invalid && firstFormGroup.get('type')?.touched">
                     <small *ngIf="firstFormGroup.get('type')?.errors?.['required']">Type of service is required.</small>
                 </div>
@@ -80,7 +80,7 @@
 
                 <!-- Full Name -->
                 <h3>Full Name <span class="required">*</span></h3>
-                <app-custom-input formControlName="name" placeholder="Full Name" />
+                <app-custom-input formControlName="name" placeholder="Full Name" (blur)="onFeildBlur('name')"/>
                 <div class="error" *ngIf="firstFormGroup.get('name')?.invalid && firstFormGroup.get('name')?.touched">
                     <small *ngIf="firstFormGroup.get('name')?.errors?.['required']">Name is required.</small>
                     <small *ngIf="firstFormGroup.get('name')?.errors?.['minlength']">Minimum 2 characters
@@ -129,7 +129,7 @@
 
                 <!-- Phone -->
                 <h3>Phone <span class="required">*</span></h3>
-                <app-custom-input formControlName="mobileNo" placeholder="Phone Number" value="+91 " />
+                <app-custom-input formControlName="mobileNo" placeholder="Phone Number" value="+91 " type="number" />
                 <div class="error"
                     *ngIf="firstFormGroup.get('mobileNo')?.invalid && firstFormGroup.get('mobileNo')?.touched">
                     <small *ngIf="firstFormGroup.get('mobileNo')?.errors?.['required']">Mobile Number is
@@ -140,7 +140,7 @@
 
                 <!-- Email -->
                 <h3>Email <span class="required">*</span></h3>
-                <app-custom-input formControlName="email" placeholder="example@abc.com" />
+                <app-custom-input formControlName="email" placeholder="example@abc.com" type="text"/>
                 <div class="error" *ngIf="firstFormGroup.get('email')?.invalid && firstFormGroup.get('email')?.touched">
                     <small *ngIf="firstFormGroup.get('email')?.errors?.['pattern']">Enter valid email address.</small>
                 </div>

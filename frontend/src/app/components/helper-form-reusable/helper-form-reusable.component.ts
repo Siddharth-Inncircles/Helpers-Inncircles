@@ -488,6 +488,15 @@ export class HelperFormReusableComponent implements OnInit, OnChanges {
     }
   }
 
+  onFeildBlur(controlName: string){
+    console.log('kjef');
+    
+    const control = this.firstFormGroup.get(controlName);
+    if(control){
+      control.markAsTouched();
+    }
+  }
+
   onCancel() {
     this.formCancel.emit();
   }

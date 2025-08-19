@@ -11,7 +11,7 @@
 <mat-form-field appearance="outline" class="custom-form-field">
   <mat-icon matPrefix *ngIf="icon">{{ icon }}</mat-icon>
 
-  <mat-select [placeholder]="placeholder" class="custom-select" [value]="value" (selectionChange)="onSelectionChange($event.value)">
+  <mat-select [placeholder]="placeholder" class="custom-select" [value]="value" (selectionChange)="onSelectionChange($event.value)" (blur)="onTouch()">
     <mat-option *ngFor="let opt of options" [value]="opt.value"
     >
       {{ opt.label }}

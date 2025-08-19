@@ -1,10 +1,9 @@
 <div class="helper-form-container">
   <h2 class="add-heading"><span class="material-symbols-outlined" (click)="onFormCancel()">
-            arrow_back_ios_new
-        </span>Add Helper</h2>
+      arrow_back_ios_new
+    </span>Add Helper</h2>
 
   <app-helper-form-reusable mode="create" submitButtonText="Add Helper" [showCancelButton]="true" [enableSteps]="true"
-    (formSubmit)="onFormSubmit($event)" (formCancel)="onFormCancel()"
-    (stepChanged)="onStepChanged($event)">
+    (formSubmit)="onFormSubmit($event)" (formCancel)="onFormCancel()" (stepChanged)="onStepChanged($event)">
   </app-helper-form-reusable>
 </div>

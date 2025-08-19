@@ -48,17 +48,17 @@ export class HelperFormComponent {
     processedFormData.append('mobileNo', formData.mobileNo || '');
     processedFormData.append('emailId', formData.email || '');
     processedFormData.append('vechileType', formData.vehicleType === '' ? 'None' : (formData.vehicleType || ''));
-    processedFormData.append('vechileNumber', formData.vehicleNumber || '');
+    if (formData.vehicleType !== 'None' && formData.vehicleType !== '') {
+      processedFormData.append('vechileNumber', formData.vehicleNumber || '');
+    }
     processedFormData.append('joinedOn', new Date().toISOString());
 
-    // Add languages array
     if (formData.language && Array.isArray(formData.language)) {
       formData.language.forEach((lang: string, index: number) => {
         processedFormData.append(`language[${index}]`, lang);
       });
     }
 
-    // Add files
     if (formData.profileImage && formData.profileImage instanceof File) {
       processedFormData.append('profileImage', formData.profileImage);
     }
@@ -104,7 +104,7 @@ export class HelperFormComponent {
       panelClass: 'success-dialog-panel'
     });
     // console.log(helperData);
-    
+
     setTimeout(() => {
       successDialogRef.close();
       this.showIdCard(helperData);
